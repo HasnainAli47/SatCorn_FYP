@@ -1,0 +1,27 @@
+from rest_framework import serializers
+from .models import User, Field
+
+class UserSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = User
+        fields = ['id', 'name', 'email', 'password', 'is_verified']  # Use 'email' instead of 'username'
+        extra_kwargs = {'password': {'write_only': True}}
+
+    def create(self, validated_data):
+        password = validated_data.pop('password', None)
+        instance = self.Meta.model(**validated_data)
+        if password is not None:
+            instance.set_password(password)
+        instance.save()
+        return instance
+
+class FieldSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Field
+        fields = ['id', 'user', 'name', 'coordinates']
+        
+    
+
+class VerifyOTPSerializer(serializers.Serializer):
+    email = serializers.CharField()
+    otp = serializers.CharField()
