@@ -6,7 +6,7 @@ function MapExample() {
   useEffect(() => {
     // Make sure the Google Maps JavaScript API is loaded with your API key
     const script = document.createElement("script");
-    script.src = `https://maps.googleapis.com/maps/api/js?key=AIzaSyBkCQ1zsThI58J5Z-XP_UZLrKHpGyKXaDg&libraries=places&callback=initializeMap`;
+    script.src = `https://maps.googleapis.com/maps/api/js?key=AIzaSyD0MMmFBogaItuG5ueOEdbVN8KJuGBIdJ8&libraries=places,drawing&callback=initializeMap`;
     script.async = true;
     script.defer = true;
     script.onload = initializeMap;
@@ -18,6 +18,8 @@ function MapExample() {
     };
   }, []);
 
+  let selectedPolygon = null; // Declare the selectedPolygon variable outside the function
+
   const initializeMap = () => {
     let google = window.google;
     let map = mapRef.current;
@@ -27,8 +29,9 @@ function MapExample() {
     const mapOptions = {
       zoom: 12,
       center: myLatlng,
-      scrollwheel: false,
+      scrollwheel: true,
       zoomControl: true,
+
       styles: [
         {
           featureType: "administrative",
@@ -38,7 +41,7 @@ function MapExample() {
         {
           featureType: "landscape",
           elementType: "all",
-          stylers: [{ color: "#f2f2f2" }],
+          stylers: [{ color: "#b5d0c4" }], // Light green for landscape
         },
         {
           featureType: "poi",
@@ -48,32 +51,47 @@ function MapExample() {
         {
           featureType: "road",
           elementType: "all",
-          stylers: [{ saturation: -100 }, { lightness: 45 }],
-        },
-        {
-          featureType: "road.highway",
-          elementType: "all",
-          stylers: [{ visibility: "simplified" }],
-        },
-        {
-          featureType: "road.arterial",
-          elementType: "labels.icon",
-          stylers: [{ visibility: "off" }],
-        },
-        {
-          featureType: "transit",
-          elementType: "all",
-          stylers: [{ visibility: "off" }],
+          stylers: [{ visibility: "on" }], // Hide roads
         },
         {
           featureType: "water",
           elementType: "all",
-          stylers: [{ color: "#4299e1" }, { visibility: "on" }],
+          stylers: [{ color: "#73b1e6" }], // Blue for water
         },
       ],
     };
 
     map = new google.maps.Map(map, mapOptions);
+
+    // Add a drawing manager to the map
+    const drawingManager = new google.maps.drawing.DrawingManager({
+      drawingMode: google.maps.drawing.OverlayType.POLYGON,
+      drawingControl: true,
+      drawingControlOptions: {
+        position: google.maps.ControlPosition.TOP_CENTER,
+        drawingModes: [google.maps.drawing.OverlayType.POLYGON],
+      },
+    });
+    drawingManager.setMap(map);
+
+    google.maps.event.addListener(
+      drawingManager,
+      "polygoncomplete",
+      function (polygon) {
+        // Get the coordinates of the drawn polygon
+        const polygonCoordinates = polygon
+          .getPath()
+          .getArray()
+          .map((coord) => ({
+            lat: coord.lat(),
+            lng: coord.lng(),
+          }));
+        console.log("Polygon Coordinates:", polygonCoordinates);
+
+        // Store the selected polygon in the selectedPolygon variable
+        selectedPolygon = polygon;
+      }
+    );
 
     const marker = new google.maps.Marker({
       position: myLatlng,
@@ -95,8 +113,18 @@ function MapExample() {
     });
   };
 
+  const deleteSelectedPolygon = () => {
+    // Check if there is a selected polygon to delete
+    if (selectedPolygon) {
+      selectedPolygon.setMap(null); // Remove the polygon from the map
+      selectedPolygon = null; // Set the selectedPolygon variable to null
+    }
+  };
+
   return (
     <>
+      <button onClick={deleteSelectedPolygon}>Delete Selected Polygon</button>
+
       <div className="relative w-full rounded h-600-px">
         <div className="rounded h-full" ref={mapRef} />
       </div>

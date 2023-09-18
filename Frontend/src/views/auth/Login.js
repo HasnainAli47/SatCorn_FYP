@@ -1,7 +1,35 @@
 import React from "react";
 import { Link } from "react-router-dom";
+import { useState } from "react";
+import { useForm } from "react-hook-form";
 
 export default function Login() {
+  const { register, handleSubmit } = useForm(); // Use useForm
+  const [inputs, setInputs] = useState({
+    email: "",
+    password: "",
+    agree: false,
+  });
+
+  const handleChange = (e) => {
+    setInputs((prevState) => ({
+      ...prevState,
+      [e.target.name]: e.target.value,
+    }));
+  };
+
+  const onSubmit = (data) => {
+    console.log(data);
+    // Add your signup logic here
+
+    // Reset the form fields and state
+    resetState();
+  };
+
+  const resetState = () => {
+    // Reset the form fields and state
+    setInputs({ email: "", password: "", agree: false });
+  };
   return (
     <>
       <div className="container mx-auto px-4 h-full">
@@ -44,7 +72,7 @@ export default function Login() {
                 <div className="text-blueGray-400 text-center mb-3 font-bold">
                   <small>Or sign in with credentials</small>
                 </div>
-                <form>
+                <form onSubmit={handleSubmit(onSubmit)}>
                   <div className="relative w-full mb-3">
                     <label
                       className="block uppercase text-blueGray-600 text-xs font-bold mb-2"
@@ -53,6 +81,11 @@ export default function Login() {
                       Email
                     </label>
                     <input
+                      required
+                      {...register("email")}
+                      name="email"
+                      onChange={handleChange}
+                      value={inputs.email}
                       type="email"
                       className="border-0 px-3 py-3 placeholder-blueGray-300 text-blueGray-600 bg-white rounded text-sm shadow focus:outline-none focus:ring w-full ease-linear transition-all duration-150"
                       placeholder="Email"
@@ -67,6 +100,11 @@ export default function Login() {
                       Password
                     </label>
                     <input
+                      required
+                      {...register("password")}
+                      onChange={handleChange}
+                      value={inputs.password}
+                      name="password"
                       type="password"
                       className="border-0 px-3 py-3 placeholder-blueGray-300 text-blueGray-600 bg-white rounded text-sm shadow focus:outline-none focus:ring w-full ease-linear transition-all duration-150"
                       placeholder="Password"
@@ -75,6 +113,14 @@ export default function Login() {
                   <div>
                     <label className="inline-flex items-center cursor-pointer">
                       <input
+                        required
+                        {...register("agree")}
+                        onChange={() =>
+                          setInputs((prev) => ({
+                            ...prev,
+                            agree: !inputs.agree,
+                          }))
+                        }
                         id="customCheckLogin"
                         type="checkbox"
                         className="form-checkbox border-0 rounded text-blueGray-700 ml-1 w-5 h-5 ease-linear transition-all duration-150"
@@ -88,7 +134,7 @@ export default function Login() {
                   <div className="text-center mt-6">
                     <button
                       className="bg-blueGray-800 text-white active:bg-blueGray-600 text-sm font-bold uppercase px-6 py-3 rounded shadow hover:shadow-lg outline-none focus:outline-none mr-1 mb-1 w-full ease-linear transition-all duration-150"
-                      type="button"
+                      type="submit"
                     >
                       Sign In
                     </button>
@@ -114,6 +160,17 @@ export default function Login() {
             </div>
           </div>
         </div>
+      </div>
+
+      {/* ... (other form elements) */}
+      <div className="text-center mt-6">
+        <button
+          className="bg-blueGray-800 text-white active:bg-blueGray-600 text-sm font-bold uppercase px-6 py-3 rounded shadow hover:shadow-lg outline-none focus:outline-none mr-1 mb-1 w-full ease-linear transition-all duration-150"
+          type="submit"
+          onClick={resetState}
+        >
+          Sign In
+        </button>
       </div>
     </>
   );

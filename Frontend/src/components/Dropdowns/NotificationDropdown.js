@@ -71,7 +71,7 @@ const NotificationDropdown = () => {
           }
           onClick={(e) => e.preventDefault()}
         >
-          Seprated link
+          lost
         </a>
       </div>
     </>

@@ -1,6 +1,38 @@
 import React from "react";
+import { Link } from "react-router-dom";
+import { useState } from "react";
+import { useForm } from "react-hook-form";
 
 export default function Register() {
+  const { register, handleSubmit, reset } = useForm();
+
+  const [inputs, setInputs] = useState({
+    name: "",
+    email: "",
+    password: "",
+    agree: false,
+  });
+
+  const handleChange = (e) => {
+    setInputs((prevState) => ({
+      ...prevState,
+      [e.target.name]: e.target.value,
+    }));
+  };
+
+  const onSubmit = (data) => {
+    console.log(data);
+    // Add your signup logic here
+
+    // Reset the form fields and state
+    resetState();
+  };
+
+  const resetState = () => {
+    // Reset the form fields and state
+    setInputs({ name: "", email: "", password: "", agree: false });
+  };
+
   return (
     <>
       <div className="container mx-auto px-4 h-full">
@@ -43,7 +75,7 @@ export default function Register() {
                 <div className="text-blueGray-400 text-center mb-3 font-bold">
                   <small>Or sign up with credentials</small>
                 </div>
-                <form>
+                <form onSubmit={handleSubmit(onSubmit)}>
                   <div className="relative w-full mb-3">
                     <label
                       className="block uppercase text-blueGray-600 text-xs font-bold mb-2"
@@ -52,9 +84,14 @@ export default function Register() {
                       Name
                     </label>
                     <input
-                      type="email"
+                      required
+                      {...register("name")}
+                      onChange={handleChange}
+                      value={inputs.name}
+                      name="name"
+                      type="text"
                       className="border-0 px-3 py-3 placeholder-blueGray-300 text-blueGray-600 bg-white rounded text-sm shadow focus:outline-none focus:ring w-full ease-linear transition-all duration-150"
-                      placeholder="Name"
+                      placeholder="Enter Name"
                     />
                   </div>
 
@@ -66,6 +103,11 @@ export default function Register() {
                       Email
                     </label>
                     <input
+                      required
+                      {...register("email")}
+                      name="email"
+                      onChange={handleChange}
+                      value={inputs.email}
                       type="email"
                       className="border-0 px-3 py-3 placeholder-blueGray-300 text-blueGray-600 bg-white rounded text-sm shadow focus:outline-none focus:ring w-full ease-linear transition-all duration-150"
                       placeholder="Email"
@@ -80,6 +122,11 @@ export default function Register() {
                       Password
                     </label>
                     <input
+                      required
+                      {...register("password")}
+                      onChange={handleChange}
+                      value={inputs.password}
+                      name="password"
                       type="password"
                       className="border-0 px-3 py-3 placeholder-blueGray-300 text-blueGray-600 bg-white rounded text-sm shadow focus:outline-none focus:ring w-full ease-linear transition-all duration-150"
                       placeholder="Password"
@@ -89,6 +136,14 @@ export default function Register() {
                   <div>
                     <label className="inline-flex items-center cursor-pointer">
                       <input
+                        required
+                        {...register("agree")}
+                        onChange={() =>
+                          setInputs((prev) => ({
+                            ...prev,
+                            agree: !inputs.agree,
+                          }))
+                        }
                         id="customCheckLogin"
                         type="checkbox"
                         className="form-checkbox border-0 rounded text-blueGray-700 ml-1 w-5 h-5 ease-linear transition-all duration-150"
@@ -109,7 +164,7 @@ export default function Register() {
                   <div className="text-center mt-6">
                     <button
                       className="bg-blueGray-800 text-white active:bg-blueGray-600 text-sm font-bold uppercase px-6 py-3 rounded shadow hover:shadow-lg outline-none focus:outline-none mr-1 mb-1 w-full ease-linear transition-all duration-150"
-                      type="button"
+                      type="submit"
                     >
                       Create Account
                     </button>
@@ -117,8 +172,35 @@ export default function Register() {
                 </form>
               </div>
             </div>
+            <div className="flex flex-wrap mt-6 relative">
+              <div className="w-1/2">
+                <a
+                  href="#pablo"
+                  onClick={(e) => e.preventDefault()}
+                  className="text-blueGray-200"
+                >
+                  <small>Already have Account?</small>
+                </a>
+              </div>
+              <div className="w-1/2 text-right">
+                <Link to="/auth/login" className="text-blueGray-200">
+                  <small>Login here</small>
+                </Link>
+              </div>
+            </div>
           </div>
         </div>
+      </div>
+
+      {/* ... (other form elements) */}
+      <div className="text-center mt-6">
+        <button
+          className="bg-blueGray-800 text-white active:bg-blueGray-600 text-sm font-bold uppercase px-6 py-3 rounded shadow hover:shadow-lg outline-none focus:outline-none mr-1 mb-1 w-full ease-linear transition-all duration-150"
+          type="submit"
+          onClick={resetState}
+        >
+          Sign In
+        </button>
       </div>
     </>
   );

@@ -4,7 +4,7 @@ import { Link } from "react-router-dom";
 // components
 
 import Navbar from "components/Navbars/AuthNavbar.js";
-import Footer from "components/Footers/Footer.js";
+// import Footer from "components/Footers/Footer.js";
 
 export default function Landing() {
   return (
@@ -560,7 +560,7 @@ export default function Landing() {
           </div>
         </section>
       </main>
-      <Footer />
+      {/* <Footer /> */}
     </>
   );
 }
