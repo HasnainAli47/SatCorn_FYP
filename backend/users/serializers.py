@@ -29,7 +29,7 @@ class FarmSerializer(serializers.ModelSerializer):
 class SeasonSerializer(serializers.ModelSerializer):
     class Meta:
         model = Season
-        fields = ['user', 'season_name', 'start_date', 'end_date', 'fields']
+        fields = ['id', 'user', 'season_name', 'start_date', 'end_date', 'fields']
     
     def validate(self, data):
         user = data.get('user')  # Access the 'user' field from the data dictionary
@@ -52,7 +52,7 @@ class SeasonSerializer(serializers.ModelSerializer):
 class FieldSerializer(serializers.ModelSerializer):
     class Meta:
         model = Field
-        fields = ['id', 'field_name', 'coordinates', 'farm']
+        fields = ['id', 'field_name', 'coordinates', 'farm', "field_crop"]
 
     def validate(self, data):
         farm = data.get('farm')

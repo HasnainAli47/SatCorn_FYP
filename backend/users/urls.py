@@ -29,7 +29,7 @@ urlpatterns = [
     # Field Handling
     path("create-field", CreateFieldView.as_view(), name="create-field"),
     path("get-fields", FieldListView.as_view(), name="retrieve-fields"),
-    path("get-fields/<int:field_id>", FieldListView.as_view(), name="retrieve-fields"),
+    path("get-fields/<int:farm_id>", FieldListView.as_view(), name="retrieve-fields"),
     path("delete-field/<int:field_id>", DeleteFieldView.as_view(), name="delete-field"),
     path("update-field/<int:field_id>", UpdateFieldView.as_view(), name="update-field"),
     

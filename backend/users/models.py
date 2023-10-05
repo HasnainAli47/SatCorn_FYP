@@ -23,7 +23,8 @@ class Farm(models.Model):
         return self.farm_name
 
 class Field(models.Model):
-    field_name = models.CharField(max_length=255)
+    field_name = models.CharField(max_length=255, default="Field")
+    field_crop = models.CharField(max_length=255, default="Crop")
     farm = models.ForeignKey(Farm, on_delete=models.CASCADE, related_name='fields')
     coordinates = models.JSONField()
 

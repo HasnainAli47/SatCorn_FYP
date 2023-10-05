@@ -27,26 +27,26 @@ export default function Admin() {
   const [isSidebarToggled, setIsSidebarToggled] = useState(false);
   const history = useHistory();
 
-  // useEffect(() => {
-  //   // Check if the user is already logged in
-  //   async function checkUserLogin() {
-  //     try {
-  //       const response = await Axios.get('http://127.0.0.1:8000/api/user', {
-  //         withCredentials: true, // Include cookies with the request
-  //       });
+  useEffect(() => {
+    // Check if the user is already logged in
+    async function checkUserLogin() {
+      try {
+        const response = await Axios.get('http://127.0.0.1:8000/api/user', {
+          withCredentials: true, // Include cookies with the request
+        });
     
-  //       if (response.status === 200) {
-  //         console.log("Yes, you are logged in", response);
-  //       }
-  //     } catch (error) {
-  //       console.log("No, you are not logged in");
-  //       // User is not logged in, redirect to the login page if needed
-  //       // history.push("/login"); // Redirect to the login page or any other authorized route
-  //     }
-  //   }
+        if (response.status === 200) {
+          console.log("Yes, you are logged in", response);
+        }
+      } catch (error) {
+        console.log("No, you are not logged in");
+        // User is not logged in, redirect to the login page if needed
+        history.push("/login"); // Redirect to the login page or any other authorized route
+      }
+    }
 
-  //   checkUserLogin();
-  // }, [history]);
+    checkUserLogin();
+  }, [history]);
 
   return (
     

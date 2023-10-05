@@ -136,7 +136,7 @@ class loginView(APIView):
 # Verify the user with jwt
 def get_user_with_jwt(request):
     token = request.COOKIES.get('jwt')
-    print("use token is ", token)
+    print("use token is ", request.COOKIES.get('jwt'))
     
     if not token:
         raise AuthenticationFailed('Unauthenticated!')
@@ -258,14 +258,14 @@ class FarmListView(APIView):
         if farm_id is not None:
             # Get a specific farm by ID
             try:
-                farm = Farm.objects.get(id=farm_id)
+                farm = Farm.objects.get(id=farm_id, user=user)
                 serializer = FarmSerializer(farm)
                 return Response(serializer.data, status=status.HTTP_200_OK)
             except Farm.DoesNotExist:
                 return Response({'message': 'Farm not found'}, status=status.HTTP_404_NOT_FOUND)
         else:
             # Get all farms
-            farms = Farm.objects.all()
+            farms = Farm.objects.filter(user=user)
             serializer = FarmSerializer(farms, many=True)
             return Response(serializer.data, status=status.HTTP_200_OK)
             
@@ -563,24 +563,25 @@ class DeleteFieldView(APIView):
 # Get the field
 class FieldListView(APIView):
 
-    def get(self, request, field_id=None):
-        user = get_user_with_jwt(request)
+    def get(self, request, farm_id=None):
+        user = get_user_with_jwt(request);
+        print("User is ");
+        print("This is field farm")
 
         if not user:
             raise AuthenticationFailed('User not found')
 
         try:
-            if field_id is not None:
-                # Get a specific field by ID belonging to the current user
-                field = Field.objects.filter(id=field_id, farm__user=user).first()
-                if not field:
-                    raise NotFound(detail="Field not found")
-
-                serializer = FieldSerializer(field)
+            print("Farm id is ", farm_id)
+            if farm_id is not None:
+                # Get all fields belonging to the farm with the specified ID and the current user
+                fields = Field.objects.filter(farm__id=farm_id, farm__user=user)
+                serializer = FieldSerializer(fields, many=True)
                 return Response(serializer.data, status=status.HTTP_200_OK)
             else:
                 # Get all fields belonging to the current user
                 fields = Field.objects.filter(farm__user=user)
+                
                 serializer = FieldSerializer(fields, many=True)
                 return Response(serializer.data, status=status.HTTP_200_OK)
         except Exception as e:

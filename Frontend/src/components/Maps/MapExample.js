@@ -1,17 +1,20 @@
 /* global google */
-import React, { useEffect, useRef, useState, useCallback } from "react"; // Import useState
+import React, { useEffect, useRef, useState, useCallback, mapRef } from "react"; // Import useState
 import NewSidebar from "./NewSidebar.js";
 
 function MapExample() {
   const mapRef = useRef(null);
   const [isDrawing, setIsDrawing] = useState(false);
+  const [polygonCoordinates, setPolygonCoordinates] = useState(null);
+  const [showForm, setShowForm] = useState(false);
+  const [latit, setlat] = useState("31.5204")
+  const [lngi, setlng] = useState("74.3587")
 
   let drawingManager = null; // Declare drawingManager variable outside useEffect
 
   useEffect(() => {
-    // Make sure the Google Maps JavaScript API is loaded with your API key
     const script = document.createElement("script");
-    script.src = `https://maps.googleapis.com/maps/api/js?key=AIzaSyDMQ9T53DzGbXOtXgrVdBXydpBZN5bgGDs&libraries=places,drawing&callback=initializeMap`;
+    script.src = `https://maps.googleapis.com/maps/api/js?key=${process.env.REACT_APP_GOOGLE_MAPS_API_KEY}&libraries=places,drawing&callback=initializeMap`;
     script.async = true;
     script.defer = true;
     script.onload = initializeMap;
@@ -21,20 +24,20 @@ function MapExample() {
       // Clean up by removing the script when the component unmounts
       document.head.removeChild(script);
     };
-  }, []);
+  }, [latit, lngi]);
 
-  let selectedPolygon = null; // Declare the selectedPolygon variable outside the function
-  const [polygonCoordinates, setPolygonCoordinates] = useState(null);
+//  const [polygonCoordinates, setPolygonCoordinates] = useState(null);
+const selectedPolygon = useRef(null);
+
+const drawingManagerRef = useRef(null);
 
   const initializeMap = () => {
     let google = window.google;
     let map = mapRef.current;
-    let lat = "31.5204";
-    let lng = "74.3587";
 
-    const myLatlng = new google.maps.LatLng(lat, lng);
+    const myLatlng = new google.maps.LatLng(latit, lngi);
     const mapOptions = {
-      zoom: 8,
+      zoom:15,
       center: myLatlng,
       scrollwheel: true,
       zoomControl: true,
@@ -71,15 +74,16 @@ function MapExample() {
     map = new google.maps.Map(mapRef.current, mapOptions); // Use mapRef.current
 
     // Add a drawing manager to the map
-    const drawingManager = new google.maps.drawing.DrawingManager({
-      drawingMode: google.maps.drawing.OverlayType.POLYGON,
+    drawingManager = new google.maps.drawing.DrawingManager({
       drawingControl: true,
       drawingControlOptions: {
         position: google.maps.ControlPosition.TOP_CENTER,
-        drawingModes: [google.maps.drawing.OverlayType.POLYGON],
+        drawingModes: [google.maps.drawing.OverlayType.POLYGON],   
       },
     });
+    drawingManagerRef.current = drawingManager;  // Store it in the ref.
     drawingManager.setMap(map);
+    
 
     google.maps.event.addListener(
       drawingManager,
@@ -93,12 +97,17 @@ function MapExample() {
             lat: coord.lat(),
             lng: coord.lng(),
           }));
-        console.log("Polygon Coordinates:", polygonCoordinates);
+        // console.log("Polygon Coordinates:", polygonCoordinates);
+        setPolygonCoordinates(polygonCoordinates);
 
         // Store the selected polygon in the selectedPolygon variable
-        selectedPolygon = polygon;
+        selectedPolygon.current = polygon;
+        setShowForm(true); // Show the form.
+
         setIsDrawing(false); // Stop drawing mode
-        handlePolygonComplete(polygonCoordinates); // Notify the sidebar of the completion
+       // handlePolygonComplete(polygonCoordinates); // Notify the sidebar of the completion
+       drawingManager.setDrawingMode(null); // Disable continuous drawing
+
       }
     );
 
@@ -122,18 +131,26 @@ function MapExample() {
     });
   };
 
+  const handleFarmSelection = (latitude, longitude) => {
+    // Do something with latitude and longitude
+    setlat(latitude)
+    setlng(longitude)
+    initializeMap()
+  };
+
+
   const deleteSelectedPolygon = () => {
     // Check if there is a selected polygon to delete
-    if (selectedPolygon) {
-      selectedPolygon.setMap(null); // Remove the polygon from the map
-      selectedPolygon = null; // Set the selectedPolygon variable to null
+    if (selectedPolygon.current) {
+      selectedPolygon.current.setMap(null); // Remove the polygon from the map
+      selectedPolygon.current = null; // Set the selectedPolygon variable to null
     }
   };
 
   const handleDrawField = useCallback(() => {
-    setIsDrawing(true);
-    if (drawingManager) {
-      drawingManager.setDrawingMode(google.maps.drawing.OverlayType.POLYGON);
+    setIsDrawing(true);  // Indicate drawing mode is on.
+    if (drawingManagerRef.current) {
+      drawingManagerRef.current.setDrawingMode(google.maps.drawing.OverlayType.POLYGON);
     }
   }, []);
 
@@ -142,13 +159,22 @@ function MapExample() {
     console.log("Polygon Coordinates:", coordinates);
     // ...
   }, []);
+
+
   return (
     <>
       <NewSidebar
+        showForm={showForm}
+        setShowForm={setShowForm}
         onDrawField={handleDrawField}
         onPolygonComplete={handlePolygonComplete}
         onDeletePolygon={deleteSelectedPolygon}
+        polygonCoordinates={polygonCoordinates}
         isDrawing={isDrawing}
+        onFarmSelection={handleFarmSelection}
+        initializeMap={initializeMap}
+        mapRef={mapRef}
+
       />
 
       <div className="relative w-full rounded h-screen ">
