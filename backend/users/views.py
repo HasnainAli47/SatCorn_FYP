@@ -283,18 +283,8 @@ class CreateSeasonView(APIView):
             # Extract data from the request
             data = request.data
 
-            # Check if the 'fields' provided in the data belong to the current user
-            provided_field_ids = [field_id for field_id in data.get('fields', [])]
 
-            # Get the fields that belong to the user
-            user_fields = Field.objects.filter(farm__user=user)
-
-            # Check if all provided field IDs belong to the user
-            if not all(field.id in provided_field_ids for field in user_fields):
-                return Response({
-                    'status': status.HTTP_400_BAD_REQUEST,
-                    'message': 'One or more fields provided do not belong to the user.',
-                })
+            
 
             # Assign the current user ID to the 'user' field
             data['user'] = user.id  # Check if user.id contains a valid integer
@@ -602,10 +592,9 @@ class CreateCropRotationView(APIView):
             raise AuthenticationFailed('User not found')
 
         try:
-            # Extract data from the request for creating a crop rotation
             data = request.data
             field_id = data.get('field')
-            season_ids = data.get('seasons')
+            season_id = data.get('season')  # Note the change here
 
             # Check if the field ID belongs to the current user's farm
             try:
@@ -613,22 +602,20 @@ class CreateCropRotationView(APIView):
             except Field.DoesNotExist:
                 return Response({'message': 'You don\'t have such a field.'}, status=status.HTTP_400_BAD_REQUEST)
 
-            # Ensure that the selected seasons belong to the same user as the field
-            for season_id in season_ids:
-                try:
-                    season = Season.objects.get(id=season_id, user=user)
-                except Season.DoesNotExist:
-                    return Response({'message': f'Season with ID {season_id} does not exist or does not belong to you.'}, status=status.HTTP_400_BAD_REQUEST)
+            # Ensure that the selected season belongs to the user
+            try:
+                season = Season.objects.get(id=season_id, user=user)
+            except Season.DoesNotExist:
+                return Response({'message': f'Season with ID {season_id} does not exist or does not belong to you.'}, status=status.HTTP_400_BAD_REQUEST)
 
-            # Add the field ID and user to the data for creating the crop rotation
+            # Add the field ID and season ID to the data for creating the crop rotation
             data['field'] = field.id
+            data['season'] = season.id  # Note the change here
 
             serializer = CropRotationSerializer(data=data)
 
             if serializer.is_valid():
-                # Save the crop rotation
                 serializer.save()
-
                 return Response({
                     'status': status.HTTP_201_CREATED,
                     'message': 'Crop rotation created successfully',
@@ -646,31 +633,43 @@ class CreateCropRotationView(APIView):
                 'message': 'An error occurred while creating the crop rotation',
                 'error': str(e)
             })
+
             
             
             
 # Update the Crop Rotation view
 class UpdateCropRotationView(APIView):
-    queryset = CropRotation.objects.all()
     serializer_class = CropRotationSerializer
 
-    def post(self, request):
+    def post(self, request, season_id, field_id):  # Note the additional arguments to get data from the URL
         user = get_user_with_jwt(request)
 
         if not user:
             raise AuthenticationFailed('User not found')
 
         try:
-            instance = self.get_object()
+            # Check if season and field belong to the user
+            try:
+                season = Season.objects.get(id=season_id, user=user)
+                field = Field.objects.get(id=field_id, farm__user=user)
+            except (Season.DoesNotExist, Field.DoesNotExist):
+                return Response({'message': 'Season or Field does not exist or does not belong to you.'}, status=status.HTTP_400_BAD_REQUEST)
 
-            # Check if the user has permissions to update this crop rotation
-            if instance.field.farm.user != user:
-                return Response({'message': 'You do not have permission to update this crop rotation.'}, status=status.HTTP_403_FORBIDDEN)
+            # Check for an existing crop rotation for the provided season and field
+            try:
+                instance = CropRotation.objects.get(season=season, field=field)
+            except CropRotation.DoesNotExist:
+                return Response({'message': 'Crop rotation not found'}, status=status.HTTP_404_NOT_FOUND)
 
             # Extract and update data from the request
-            data = request.data
+            data = {
+                'crop_name': request.data.get('crop_name', instance.crop_name),
+                'planting_date': request.data.get('planting_date', instance.planting_date),
+                'harvesting_date': request.data.get('harvesting_date', instance.harvesting_date),
+                'crop_variety': request.data.get('crop_variety', instance.crop_variety),
+            }
 
-            serializer = self.get_serializer(instance, data=data, partial=True)
+            serializer = self.serializer_class(instance, data=data, partial=True)
 
             if serializer.is_valid():
                 serializer.save()
@@ -686,41 +685,78 @@ class UpdateCropRotationView(APIView):
                     'message': 'Invalid data',
                     'errors': serializer.errors
                 })
-        except NotFound:
-            return Response({'message': 'Crop rotation not found'}, status=status.HTTP_404_NOT_FOUND)
         except Exception as e:
             return Response({
                 'status': status.HTTP_500_INTERNAL_SERVER_ERROR,
                 'message': 'An error occurred while updating the crop rotation',
                 'error': str(e)
             })
+
             
 # Get the Crop Rotation view with id and all 
 class CropRotationListView(APIView):
 
-    def get(self, request, crop_rotation_id=None):
+    def get(self, request, season_id=None, field_id=None):  # Make arguments optional with default value as None
         user = get_user_with_jwt(request)
 
         if not user:
             raise AuthenticationFailed('User not found')
 
         try:
-            if crop_rotation_id is not None:
-                # Get a specific crop rotation by ID belonging to the current user
-                crop_rotation = CropRotation.objects.filter(id=crop_rotation_id, field__farm__user=user).first()
+            # If both season_id and field_id are provided, get the specific crop rotation
+            if season_id and field_id:
+                crop_rotation = CropRotation.objects.filter(season__id=season_id, field__id=field_id, field__farm__user=user).first()
+                
                 if not crop_rotation:
                     raise NotFound(detail="Crop rotation not found")
 
                 serializer = CropRotationSerializer(crop_rotation)
                 return Response(serializer.data, status=status.HTTP_200_OK)
             else:
-                # Get all crop rotations belonging to the current user
+                # If no specific season_id and field_id are provided, get all crop rotations for the user
                 crop_rotations = CropRotation.objects.filter(field__farm__user=user)
                 serializer = CropRotationSerializer(crop_rotations, many=True)
                 return Response(serializer.data, status=status.HTTP_200_OK)
+        
         except Exception as e:
             return Response({
                 'status': status.HTTP_500_INTERNAL_SERVER_ERROR,
                 'message': 'An error occurred while fetching crop rotations',
+                'error': str(e)
+            })
+
+            
+#Delete the crop rotation    
+    
+class DeleteCropRotationView(APIView):
+
+    def get(self, request, crop_rotation_id):
+        user = get_user_with_jwt(request)
+        print("You are at the deletion of the crop rotation")
+
+        if not user:
+            raise AuthenticationFailed('User not found')
+
+        try:
+            crop_rotation = CropRotation.objects.get(id=crop_rotation_id)
+            
+            # Check if the user has permissions to delete this crop rotation
+            if crop_rotation.field.farm.user != user:
+                return Response({'message': 'You do not have permission to delete this crop rotation.'}, status=status.HTTP_403_FORBIDDEN)
+
+            # Delete the crop rotation
+            crop_rotation.delete()
+
+            return Response({
+                'status': status.HTTP_200_OK,
+                'message': 'Crop rotation deleted successfully',
+            })
+
+        except CropRotation.DoesNotExist:
+            return Response({'message': 'Crop rotation not found'}, status=status.HTTP_404_NOT_FOUND)
+        except Exception as e:
+            return Response({
+                'status': status.HTTP_500_INTERNAL_SERVER_ERROR,
+                'message': 'An error occurred while deleting the crop rotation',
                 'error': str(e)
             })

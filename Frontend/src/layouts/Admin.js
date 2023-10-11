@@ -15,7 +15,7 @@ import Sidebar from "components/Sidebar/Sidebar.js";
 
 // views
 
-import Season from "views/admin/Season";
+// import Season from "views/admin/Season";
 import Maps from "views/admin/Maps.js";
 import Settings from "views/admin/Settings.js";
 import Farms from "views/admin/Farms.js";
@@ -62,7 +62,7 @@ export default function Admin() {
         {/* <IndexNavbar /> */}
         {/* <div className="px-4 md:px-10 mx-auto w-full -m-24"> */}
         <Switch>
-          <Route path="/admin/season" exact component={Season} />
+          {/* <Route path="/admin/season" exact component={Season} /> */}
           <Route path="/admin/croprotation" exact component={Croprotation} />
           <Route path="/admin/maps" exact component={Maps} />
           <Route path="/admin/settings" exact component={Settings} />

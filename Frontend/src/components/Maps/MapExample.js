@@ -1,165 +1,115 @@
-/* global google */
-import React, { useEffect, useRef, useState, useCallback, mapRef } from "react"; // Import useState
+import React, { useEffect, useRef, useState } from "react";
 import NewSidebar from "./NewSidebar.js";
 
 function MapExample() {
-  const mapRef = useRef(null);
-  const [isDrawing, setIsDrawing] = useState(false);
-  const [polygonCoordinates, setPolygonCoordinates] = useState(null);
+  const [polygonMap, setPolygonMap] = useState(null);
+  const [polygonCoordinates, setPolygonCoordinates] = useState([]);
   const [showForm, setShowForm] = useState(false);
-  const [latit, setlat] = useState("31.5204")
-  const [lngi, setlng] = useState("74.3587")
+  const [isDrawing, setIsDrawing] = useState(false);
+  const [apiKey, setApiKey] = useState("AIzaSyDMQ9T53DzGbXOtXgrVdBXydpBZN5bgGDs"); // Set your Google API Key here
+  const selectedPolygon = useRef(null);
+  const [lat, setlat] = useState(28.486753029366852)
+  const [lng, setlng] = useState(70.0956817623839)
 
-  let drawingManager = null; // Declare drawingManager variable outside useEffect
+  const onPolygonComplete = (polygon) => {
+    const coords = polygon
+      .getPath()
+      .getArray()
+      .map((coord) => ({
+        lat: coord.lat(),
+        lng: coord.lng(),
+      }));
+    setPolygonCoordinates(coords);
+    selectedPolygon.current = polygon;
+    setShowForm(true);
+  };
+
+
+  useEffect(() => {
+    if (polygonMap && lat && lng) {
+      const newCenter = new window.google.maps.LatLng(lat, lng);
+      polygonMap.setCenter(newCenter);
+    }
+  }, [lat, lng, polygonMap]);
 
   useEffect(() => {
     const script = document.createElement("script");
-    script.src = `https://maps.googleapis.com/maps/api/js?key=${process.env.REACT_APP_GOOGLE_MAPS_API_KEY}&libraries=places,drawing&callback=initializeMap`;
+    script.src = `https://maps.googleapis.com/maps/api/js?key=${apiKey}&libraries=drawing`;
     script.async = true;
     script.defer = true;
-    script.onload = initializeMap;
+
+    script.addEventListener("load", () => {
+      const map = new window.google.maps.Map(document.getElementById("map"), {
+        center: { lat: lat, lng: lng },
+        zoom: 17,
+        mapTypeId: "satellite",
+      });
+      setPolygonMap(map);
+    });
+
     document.head.appendChild(script);
 
     return () => {
-      // Clean up by removing the script when the component unmounts
       document.head.removeChild(script);
     };
-  }, [latit, lngi]);
+  }, [apiKey]);
 
-//  const [polygonCoordinates, setPolygonCoordinates] = useState(null);
-const selectedPolygon = useRef(null);
-
-const drawingManagerRef = useRef(null);
-
-  const initializeMap = () => {
-    let google = window.google;
-    let map = mapRef.current;
-
-    const myLatlng = new google.maps.LatLng(latit, lngi);
-    const mapOptions = {
-      zoom:15,
-      center: myLatlng,
-      scrollwheel: true,
-      zoomControl: true,
-
-      styles: [
-        {
-          featureType: "administrative",
-          elementType: "labels.text.fill",
-          stylers: [{ color: "#444444" }],
+  useEffect(() => {
+    if (polygonMap) {
+      const drawingManager = new window.google.maps.drawing.DrawingManager({
+        drawingMode: window.google.maps.drawing.OverlayType.POLYGON,
+        drawingControl: true,
+        drawingControlOptions: {
+          position: window.google.maps.ControlPosition.TOP_CENTER,
+          drawingModes: [window.google.maps.drawing.OverlayType.POLYGON],
         },
-        {
-          featureType: "landscape",
-          elementType: "all",
-          stylers: [{ color: "#b5d0c4" }], // Light green for landscape
+        polygonOptions: {
+          strokeColor: "#FFFF00",
+          fillColor: "#FFFF00",
         },
-        {
-          featureType: "poi",
-          elementType: "all",
-          stylers: [{ visibility: "off" }],
-        },
-        {
-          featureType: "road",
-          elementType: "all",
-          stylers: [{ visibility: "on" }], // Hide roads
-        },
-        {
-          featureType: "water",
-          elementType: "all",
-          stylers: [{ color: "#73b1e6" }], // Blue for water
-        },
-      ],
-    };
+      });
+      drawingManager.setMap(polygonMap);
 
-    map = new google.maps.Map(mapRef.current, mapOptions); // Use mapRef.current
+      drawingManager.addListener("polygoncomplete", onPolygonComplete);
+    }
+  }, [polygonMap]);
 
-    // Add a drawing manager to the map
-    drawingManager = new google.maps.drawing.DrawingManager({
-      drawingControl: true,
-      drawingControlOptions: {
-        position: google.maps.ControlPosition.TOP_CENTER,
-        drawingModes: [google.maps.drawing.OverlayType.POLYGON],   
-      },
-    });
-    drawingManagerRef.current = drawingManager;  // Store it in the ref.
-    drawingManager.setMap(map);
-    
-
-    google.maps.event.addListener(
-      drawingManager,
-      "polygoncomplete",
-      function (polygon) {
-        // Get the coordinates of the drawn polygon
-        const polygonCoordinates = polygon
-          .getPath()
-          .getArray()
-          .map((coord) => ({
-            lat: coord.lat(),
-            lng: coord.lng(),
-          }));
-        // console.log("Polygon Coordinates:", polygonCoordinates);
-        setPolygonCoordinates(polygonCoordinates);
-
-        // Store the selected polygon in the selectedPolygon variable
-        selectedPolygon.current = polygon;
-        setShowForm(true); // Show the form.
-
-        setIsDrawing(false); // Stop drawing mode
-       // handlePolygonComplete(polygonCoordinates); // Notify the sidebar of the completion
-       drawingManager.setDrawingMode(null); // Disable continuous drawing
-
-      }
-    );
-
-    const marker = new google.maps.Marker({
-      position: myLatlng,
-      map: map,
-      animation: google.maps.Animation.DROP,
-      title: "Notus React!",
-    });
-
-    const contentString =
-      '<div class="info-window-content"><h2>Notus React</h2>' +
-      "<p>A free Admin for Tailwind CSS, React, and React Hooks.</p></div>";
-
-    const infowindow = new google.maps.InfoWindow({
-      content: contentString,
-    });
-
-    google.maps.event.addListener(marker, "click", function () {
-      infowindow.open(map, marker);
-    });
+  const handleDrawField = () => {
+    setIsDrawing(true);
   };
 
   const handleFarmSelection = (latitude, longitude) => {
-    // Do something with latitude and longitude
-    setlat(latitude)
-    setlng(longitude)
-    initializeMap()
+    // This can be updated based on the required interaction with NewSidebar
+    // console.log("The farm lat and lng are ", latitude, longitude);
+    setlat(latitude);
+    setlng(longitude);
   };
 
+  const initializeMapWithFields = (fields) => {
+    console.log("Fields are ", fields);
+    if (!polygonMap || !fields || fields.length === 0) return;
+
+    fields.forEach(index => {
+      const drawnPolygon = new window.google.maps.Polygon({
+        paths: index.coordinates,
+        strokeColor: "rgb(196, 238, 30)",
+        strokeOpacity: 2.5,
+        strokeWeight: 3,
+        fillOpacity: 0.0,
+        clickable: true,
+      });
+      console.log("Draw polygon is ", drawnPolygon);
+
+      drawnPolygon.setMap(polygonMap);
+    });
+  };
 
   const deleteSelectedPolygon = () => {
-    // Check if there is a selected polygon to delete
     if (selectedPolygon.current) {
-      selectedPolygon.current.setMap(null); // Remove the polygon from the map
-      selectedPolygon.current = null; // Set the selectedPolygon variable to null
+      selectedPolygon.current.setMap(null);
+      selectedPolygon.current = null;
     }
   };
-
-  const handleDrawField = useCallback(() => {
-    setIsDrawing(true);  // Indicate drawing mode is on.
-    if (drawingManagerRef.current) {
-      drawingManagerRef.current.setDrawingMode(google.maps.drawing.OverlayType.POLYGON);
-    }
-  }, []);
-
-  const handlePolygonComplete = useCallback((coordinates) => {
-    // Handle polygon completion
-    console.log("Polygon Coordinates:", coordinates);
-    // ...
-  }, []);
-
 
   return (
     <>
@@ -167,18 +117,16 @@ const drawingManagerRef = useRef(null);
         showForm={showForm}
         setShowForm={setShowForm}
         onDrawField={handleDrawField}
-        onPolygonComplete={handlePolygonComplete}
+        onPolygonComplete={onPolygonComplete}
         onDeletePolygon={deleteSelectedPolygon}
         polygonCoordinates={polygonCoordinates}
         isDrawing={isDrawing}
         onFarmSelection={handleFarmSelection}
-        initializeMap={initializeMap}
-        mapRef={mapRef}
-
+        initializeMapWithFields={initializeMapWithFields}
+        mapRef={polygonMap}
       />
-
-      <div className="relative w-full rounded h-screen ">
-        <div className="rounded h-screen" ref={mapRef} />
+      <div className="relative w-full rounded h-screen">
+        <div id="map" className="rounded h-screen" />
       </div>
     </>
   );

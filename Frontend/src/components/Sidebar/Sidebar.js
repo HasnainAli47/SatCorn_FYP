@@ -4,6 +4,9 @@ import { MoreVertical, ChevronLast, ChevronFirst } from "lucide-react";
 import { set } from "react-hook-form";
 import { useHistory } from "react-router-dom";
 import Axios from "axios";
+import axios from "axios";
+import Season from "views/admin/Season";
+import { bottom } from "@popperjs/core";
 // import image1 from "../../assets/img/logos/1.png";
 // import image2 from "../../assets/img/logos/2.png";
 
@@ -12,6 +15,33 @@ export default function Sidebar({ onToggleSidebar }) {
   const [name, setname] = useState('');
   const [email, setEmail] = useState('');
   const history = useHistory();
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [modalSeasonData, setModalSeasonData] = useState(null);
+  const [seasons, setSeasons] = useState(
+    [
+      {
+          "id": 2,
+          "user": 18,
+          "season_name": "Summer Season",
+          "start_date": "2023-05-01",
+          "end_date": "2023-08-31"
+      },
+      {
+          "id": 1,
+          "user": 18,
+          "season_name": "Summer Season 2",
+          "start_date": "2023-07-01",
+          "end_date": "2023-08-31"
+      }
+  ]);
+
+  const openModal = (seasonData = null) => {
+    console.log("Setting modal data as: ", seasonData);  // Add this line
+    setModalSeasonData(seasonData);
+    setIsModalOpen(true);
+  };
+  
+  
 
   // Logout the user
   const Logout = () => {
@@ -60,8 +90,65 @@ export default function Sidebar({ onToggleSidebar }) {
     }
 
     checkUserLogin();
+
+
+    const fetchSeasons = async () => {
+      try {
+        const response = await axios.get('http://127.0.0.1:8000/api/get-seasons', {
+          withCredentials: true, // Include cookies with the request
+        });
+        setSeasons(response.data);
+      } catch (error) {
+        console.error("Error fetching seasons:", error);
+      }
+    }
+
+    fetchSeasons();
+
   }, [history]);
 
+
+  function SidebarItem({ icon, text, to, expanded, children }) {
+    const [isDropdownOpen, setIsDropdownOpen] = useState(false);
+  
+    const handleDropdownToggle = (e) => {
+      e.preventDefault();
+      setIsDropdownOpen(!isDropdownOpen);
+    };
+  
+    return (
+      <li
+        className={`relative  py-2 px-3 my-1 font-medium rounded-md cursor-pointer transition-colors group ${
+          isDropdownOpen ? "bg-gradient-to-tr" : "hover:bg-indigo-50 text-gray-600"
+        }`}
+      >
+        <div onClick={handleDropdownToggle} className="flex items-center cursor-pointer">
+          {icon && <span className="mr-4">{icon}</span>}
+          {expanded && text}
+        </div>
+  
+        {isDropdownOpen && (
+          <div className="bg-white absolute border shadow-lg left-full  ml-5" style={{zIndex: 10000}}>
+            <ul
+              style={{
+                backgroundColor: "white",  
+                width: '200px', 
+              }}
+              
+            >
+              {children}
+            </ul>
+          </div>
+        )}
+  
+        {/* Render the link when the dropdown is closed */}
+        {!isDropdownOpen && to && (
+          <Link to={to} className="absolute w-full h-full top-0 left-0"></Link>
+        )}
+      </li>
+    );
+  }
+  
   const handleToggleSidebar = () => {
     setExpanded((curr) => !curr);
     onToggleSidebar && onToggleSidebar(!expanded); // This will send the new state to Admin
@@ -70,6 +157,7 @@ export default function Sidebar({ onToggleSidebar }) {
   // Define the logos for open and closed sidebar
   // const openLogo = image1;
   // const closedLogo = image2;
+
 
   return (
     <div className="flex">
@@ -114,12 +202,48 @@ export default function Sidebar({ onToggleSidebar }) {
           </div>
 
           <ul className="flex-1 px-3">
-            <SidebarItem
+            {/* <SidebarItem
               text={"Season"}
-              to="/admin/Season"
+              // to="/admin/Season"
               icon={<i className="fas fa-calendar mr-2 text-lg"></i>}
               expanded={expanded}
-            />
+            /> */}
+
+
+    {/* Your SidebarItem component */}
+    <SidebarItem text={"Season"} icon={<i className="fas fa-calendar mr-2 text-lg"></i>} expanded={expanded}>
+    <ul className="ml-5">
+        {seasons.map(season => (
+          <li key={season.id} className="my-2 ml-2">
+          <div onClick={() => openModal(season)} className="font-bold ">{season.season_name}</div>
+          <span className="text-sm text-gray-600">{season.start_date}</span>
+          <span className="mx-1 text-sm text-gray-600"> to </span>
+          <span className="text-sm text-gray-600">{season.end_date}</span>
+        </li>
+        
+        ))}
+        <li className="my-2 ml-2">
+        <button onClick={() => openModal()} className="bg-blueGray-600 text-white px-4 py-2 ml-2 mb-2">+ Add new season</button>
+
+
+        </li>
+      </ul>
+    </SidebarItem>
+
+    {isModalOpen && (
+      <div>
+        <Season
+          isModalOpen={isModalOpen}
+          setIsModalOpen={setIsModalOpen}
+          seasonData={modalSeasonData}
+          seasonId={modalSeasonData ? modalSeasonData.id : null}
+        />
+
+      </div>
+    )}
+
+
+
             <SidebarItem
               text={"Settings"}
               to="/admin/settings"

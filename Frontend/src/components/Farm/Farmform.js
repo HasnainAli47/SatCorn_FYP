@@ -36,6 +36,33 @@ export default function FarmCreationForm({ onLocationChange }) {
 
   const [locationEntered, setLocationEntered] = useState(false);
   const [farms, setFarms] = useState([]);
+  const [isGoogleMapsLoaded, setGoogleMapsLoaded] = useState(false);
+  const apiKey = "AIzaSyDMQ9T53DzGbXOtXgrVdBXydpBZN5bgGDs";
+
+  useEffect(() => {
+    // Check if Google Maps API is already loaded
+    if (window.google && window.google.maps && window.google.maps.places) {
+      setGoogleMapsLoaded(true);
+      return;
+    }
+  
+    const script = document.createElement("script");
+    script.src = `https://maps.googleapis.com/maps/api/js?key=${apiKey}&libraries=places`;
+    script.async = true;
+    script.defer = true;
+  
+    script.addEventListener("load", () => {
+      setGoogleMapsLoaded(true);  // Set to true once the script loads
+    });
+  
+    document.head.appendChild(script);
+  
+    // Cleanup function to remove the script if the component unmounts
+    return () => {
+      document.head.removeChild(script);
+    };
+  }, []);
+
 
   const [isModalOpen, setIsModalOpen] = useState(false); // State for modal visibility
 
@@ -61,17 +88,14 @@ export default function FarmCreationForm({ onLocationChange }) {
   useEffect(() => {
     fetchFarms(); 
 
-    if (!window.google) {
-      console.error("Google Maps JavaScript API is not loaded");
-      return;
-    }
+    if (!isGoogleMapsLoaded) return;  // Ensure Google Maps script has loaded
 
-    const autocomplete = new window.google.maps.places.Autocomplete(
-      locationInputRef.current,
-      {
-        // Make sure there are no restrictions or biasing in the options here
-      }
-    );
+      const autocomplete = new window.google.maps.places.Autocomplete(
+        locationInputRef.current,
+        {
+          // Make sure there are no restrictions or biasing in the options here
+        }
+      );
 
     autocomplete.addListener("place_changed", () => {
       const place = autocomplete.getPlace();
@@ -86,7 +110,7 @@ export default function FarmCreationForm({ onLocationChange }) {
         // You can also update the state with the coordinates here if needed
       }
     });
-  }, [formData.farmName]);
+  }, [formData.farmName, isGoogleMapsLoaded]);
 
 
   const handleDeleteFarm = async (id) => {

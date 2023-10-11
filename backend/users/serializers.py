@@ -29,7 +29,7 @@ class FarmSerializer(serializers.ModelSerializer):
 class SeasonSerializer(serializers.ModelSerializer):
     class Meta:
         model = Season
-        fields = ['id', 'user', 'season_name', 'start_date', 'end_date', 'fields']
+        fields = ['id', 'user', 'season_name', 'start_date', 'end_date']
     
     def validate(self, data):
         user = data.get('user')  # Access the 'user' field from the data dictionary
@@ -73,23 +73,23 @@ class FieldSerializer(serializers.ModelSerializer):
 class CropRotationSerializer(serializers.ModelSerializer):
     class Meta:
         model = CropRotation
-        fields = ['seasons', 'field', 'crop_name', 'planting_date', 'harvesting_date', 'crop_variety']
+        fields = ['id', 'season', 'field', 'crop_name', 'planting_date', 'harvesting_date', 'crop_variety']
 
     def validate(self, data):
-        seasons = data.get('seasons')
+        season = data.get('season')  # Note the change here: seasons -> season
         field = data.get('field')
         crop_name = data.get('crop_name')
         planting_date = data.get('planting_date')
         harvesting_date = data.get('harvesting_date')
         
-        # Check if a crop rotation with the same name, field, and planting date exists in any of the specified seasons
-        existing_rotations = CropRotation.objects.filter(seasons__in=seasons, field=field, crop_name=crop_name, planting_date=planting_date)
+        # Check if a crop rotation with the same name, field, and planting date exists for the specified season
+        existing_rotations = CropRotation.objects.filter(season=season, field=field, crop_name=crop_name, planting_date=planting_date)  # Note the change here: seasons__in -> season
         
         # If updating an existing rotation, exclude it from the check
         if self.instance:
             existing_rotations = existing_rotations.exclude(pk=self.instance.pk)
         
         if existing_rotations.exists():
-            raise serializers.ValidationError("A crop rotation with this name, field, and planting date already exists in the specified season(s).")
+            raise serializers.ValidationError("A crop rotation with this name, field, and planting date already exists in the specified season.")
         
         return data

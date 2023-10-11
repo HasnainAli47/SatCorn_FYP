@@ -1,8 +1,8 @@
 // NewSidebar.js
-import React, { useState, useEffect, useRef } from "react";
+import React, { useState, useEffect } from "react";
 import Axios from "axios";
-import ReactModal from "react-modal";
-import { google } from "google-maps";
+// import ReactModal from "react-modal";
+  
 
 
 // Add CSS styles for the modal and backdrop
@@ -36,12 +36,12 @@ function NewSidebar({
   polygonCoordinates,
   showForm, setShowForm,
   onDrawField,
-  onPolygonComplete,
+  // drawpolgon,
   onDeletePolygon,
   onFarmSelection,
   isDrawing,
-  mapRef,
-  initializeMap
+  initializeMapWithFields
+  // drawFieldsOnMap
 }) {
   // <-- Add the isDrawing prop here
   const [isDrawingMode, setIsDrawingMode] = useState(false);
@@ -49,11 +49,7 @@ function NewSidebar({
   const [selectedOption, setSelectedOption] = useState(""); // State to track the selected option
   const [fieldName, setFieldName] = useState('');
   const [cropType, setCropType] = useState('');
-  const [isModalOpen, setIsModalOpen] = useState(false);
-  // Define a reference for the drawing manager
-  const drawingManagerRef = useRef(null);
-  // Add a state variable to keep track of the drawn polygons
-  const [drawnPolygons, setDrawnPolygons] = useState([]);
+  const [showDropdown, setShowDropdown] = useState(false);
 
   const handleDrawField = () => {
     setIsDrawingMode(true);
@@ -72,9 +68,21 @@ function NewSidebar({
       field_name: "Field 2",
       id : 4,
       coordinates :{
-        0 : {latitude: 123.45678, longitude: 45.6891},
-        1 : {latitude: 123.45789, longitude: 45.679123},
-        2 : {latitude: 123.458901, longitude: 45.1679234}
+        0 : {lat: 123.45678, lng: 45.6891},
+        1 : {lat: 123.45789, lng: 45.679123},
+        2 : {lat: 123.458901, lng: 45.1679234}
+      }
+    },
+
+    {
+      farm : 12,
+      field_crop : "Corn",
+      field_name: "Field 6",
+      id : 8,
+      coordinates :{
+        0 : {lat: 25.397793115994116, lng: 68.35967415019198},
+        1 : {lat: 25.396823920750943, lng: 68.36057537242098},
+        2 : {lat: 25.39631993614838, lng: 68.35971706553622}
       }
     }
   ])
@@ -87,7 +95,7 @@ function NewSidebar({
       });
       if (response.status === 200) {
         // Set the farms data in state
-        // console.log("The backend data is ", response.data);
+        console.log("The backend data is ", response.data);
         setoptions(response.data);
 
       } else {
@@ -102,33 +110,59 @@ function NewSidebar({
   useEffect(() => {
     fetchFarms(); 
   }, [])
+
+
+  const fetchfields = async (farmId) => {
+    try {
+        const response = await Axios.get(`http://127.0.0.1:8000/api/get-fields/${farmId}`, {
+            withCredentials: true,
+        });
+
+        if (response.status === 200) {
+            console.log('Fields for farm with ID ', farmId, response.data);
+            setfields(response.data);
+        } else {
+            console.error('Failed to fetch farms');
+        }
+    } catch (error) {
+        console.error('Error:', error);
+    }
+};
   
 
-  const handleSave = () => {
+  const handleSave = async () => {
     const fieldName = document.getElementById("fieldName").value;
     const cropType = document.getElementById("cropType").value;
-    
+
+    // Convert the coordinates to the desired format
+    const formattedCoordinates = polygonCoordinates.map(coord => ({ lat: coord.lat, lng: coord.lng }));
+
     const fieldData = {
-        id: new Date().getTime(), // Assuming id as timestamp for uniqueness
         field_name: fieldName,
-        crop_type: cropType,
-        coordinates: polygonCoordinates,
-        farm: 1 // Placeholder value, replace with actual farm ID if necessary
-        
-      
-      };
-    
-    // console.log(fieldData);
-    
-    // TODO: Send this data to your backend
+        field_crop: cropType,
+        coordinates: formattedCoordinates,
+        farm: selectedFarm.id, // Use the selected farm's ID or default to 1
+    };
+
+    try {
+        const response = await Axios.post('http://127.0.0.1:8000/api/create-field', fieldData, {
+            withCredentials: true,
+        });
+
+        console.log("Response from the server:", response.data);
+        fetchfields(selectedFarm.id);
+
+    } catch (error) {
+        console.error("There was an error saving the field data:", error);
+    }
 
     // Clear form data and hide the form
     setFieldName('');
     setCropType('');
     setShowForm(false);
-    onDeletePolygon(); // Remove the last drawn polygon
-    // Clear form data and hide the form
+    // onDeletePolygon(); // Remove the last drawn polygon
 };
+
 
 
   const handleCancel = () => {
@@ -157,6 +191,8 @@ function NewSidebar({
       longitude: option.longitude,
     });
 
+    fetchfields(option.id);
+
     async function fetchfields() {
       try {
         const response = await Axios.get(`http://127.0.0.1:8000/api/get-fields/${option.id}`, {
@@ -164,11 +200,9 @@ function NewSidebar({
         });
         if (response.status === 200) {
           // Set the farms data in state
-          // console.log('Fields for farm with ID ',option.id, response.data);
+          console.log('Fields for farm with ID ',option.id, response.data);
           setfields(response.data);
           // setoptions(response.data);
-          // Draw polygons for the fields
-          drawPolygons(response.data);
   
         } else {
           console.error('Failed to fetch farms');
@@ -180,7 +214,9 @@ function NewSidebar({
 
     
 
-    fetchfields()
+    fetchfields().then(() => {
+      initializeMapWithFields(fields);
+    });
 
     setIsDropdownOpen(false);
 
@@ -191,63 +227,25 @@ function NewSidebar({
     
   };
 
-
-
-  // Add a function to draw polygons on the map
-// Add a function to draw polygons on the map
-// Add a function to draw polygons on the map
-const drawPolygons = (fields) => {
-  console.log("Fields in drawPolygons:", fields);
-
-  const polygons = [];
-
-  for (let i = 0; i < fields.length; i++) {
-    const field = fields[i];
-    console.log("Field in loop:", field.coordinates);
-
-    if (!field.coordinates || !Array.isArray(field.coordinates)) {
-      console.error("Invalid coordinates for field:", field);
-      continue; // Skip this field and continue with the next one
-    }
-
-    const polygonCoordinates = field.coordinates.map((coord) => ({
-      lat: coord.lat, // Use latitude property
-      lng: coord.lng, // Use longitude property
-    }));
-
-    console.log("Polygon Coordinates:", polygonCoordinates);
-    try {
-      initializeMap();
-    } catch (error) {
-      console.log(error)
-    }
-
-    // const polygon = new google.maps.Polygon({
-    //   paths: polygonCoordinates,
-    //   map: mapRef.current,
-    //   editable: false,
-    // });
-
-    // polygons.push(polygon);
-  }
-
-  console.log("Drawn Polygons:", polygons);
-};
-
-
-
-
   
 
 
-  const handleFieldClick = (fieldCoordinates) => {
-    // console.log("Selected Farm ID:", selectedFarm.id);
-    // console.log("Selected Farm Latitude:", selectedFarm.latitude);
-    // console.log("Selected Farm Longitude:", selectedFarm.longitude);
+  // const handleFieldClick = (polygonCoordinates) => {
+  //   console.log("Selected Farm ID:", polygonCoordinates);
 
-    // Call the method to draw the polygon with the provided coordinates
-    onPolygonComplete(fieldCoordinates);
+  //   // Call the method to draw the polygon with the provided coordinates
+  //   drawpolgon(polygonCoordinates);  };
+
+    const handleFieldClick = (polygonCoordinatesObj) => {
+      // Convert the coordinates object to an array
+      const polygonCoordinatesArray = Object.values(polygonCoordinatesObj).map(coord => ({lat: coord.latitude, lng: coord.longitude}));
+      
+      console.log("Selected Farm ID:", polygonCoordinatesArray);
+  
+      // Call the method to draw the polygon with the provided coordinates
+      // drawpolgon(polygonCoordinatesArray);
   };
+  
 
   
   const handleDelete = () => {
@@ -259,53 +257,23 @@ const drawPolygons = (fields) => {
   };
 
 
-  // Define the modal content
-  const modalContent = (
-    <div className="relative">
-      <button
-      onClick={() => setIsModalOpen(false)}
-      className="absolute top-0 right-0 mt-0 mr-0 bg-transparent border-0 text-black hover:text-gray-500 text-2xl leading-none outline-none focus:outline-none"
-      >
-        <span>&times;</span>
-      </button>
+  const dropdownContent = (
+    <div className="relative z-10 mt-2 p-2 bg-white border rounded-md shadow" style={{ width: "60%"}}>
+          
+          <button
+            onClick={onDrawField}
+            className="text-white bg-blueGray-600 text-sm font-bold uppercase py-2 px-4 rounded shadow hover:shadow-lg outline-none focus:outline-none mr-1 mb-1 w-full ease-linear transition-all focus:ring focus:ring-blueGray-300"
+            >
+            Draw Field on Map
+          </button>
+          
+          <button
+            onClick={handleDrawField}
+            className="text-white  bg-blueGray-600 text-sm font-bold uppercase py-2 px-4 rounded shadow hover:shadow-lg outline-none focus:outline-none mr-1 mb-1 w-full ease-linear transition-all focus:ring focus:ring-blueGray-300"
+          >
+            Upload Field (shp, etc)
+          </button>
 
-      <div>
-        <h2 className="text-center font-bold text-lg">List of Fields</h2>
-        {fields.length === 0 ? (
-          <p>Please enter a farm to be displayed here.</p>
-        ) : (
-          <ul>
-            {/* {console.log("Fields are ",fields)} */}
-            {fields.map((field) => (
-              
-              <div key={field.id} className="mb-3 flex items-center">
-                <div style={{ minWidth: "500px" }}>
-                  <h3
-                    className="text-md font-semibold mb-2 cursor-pointer"
-                    onClick={() => {
-                      handleFieldClick(field.coordinates);
-                    }}
-                  >
-                    Field Name: {field.field_name}
-                    
-                  </h3>
-                  Crop: {field.field_crop}
-                </div>
-                <button
-                  onClick={() => {
-                    // handleDeleteFarm(farm.id);
-                    // console.log("The button clicked is ", field.id);
-                  }}
-                  className="bg-red-500 text-white px-3 py-1 rounded hover:bg-red-600"
-                >
-                  Delete
-                </button>
-                
-              </div>
-            ))}
-          </ul>
-        )}
-      </div>
 
       </div>
     );
@@ -316,10 +284,10 @@ const drawPolygons = (fields) => {
   
   return (
     <div
-      style={{ width: "300px" }}
-      className="absolute top-0 left-0 h-screen bg-white shadow-lg p-8 rounded-md opacity-90   z-20"
+      style={{ width: "300px"}}
+      className="absolute top-0 left-0 h-screen bg-white shadow-lg p-8 rounded-md opacity-90"
     >
-       {showForm && (
+       {showForm ? (
         // Render inputs and buttons for the drawn polygon
         <div>
           {/* Add other input fields and buttons here */}
@@ -356,12 +324,7 @@ const drawPolygons = (fields) => {
           
 
           <div className="flex justify-end mt-4">
-          <button
-            className="bg-red-500 text-white p-2 rounded-md"
-            onClick={handleDelete} // Link to the delete function
-          >
-            Delete
-          </button>
+          
             <button
               onClick={handleCancel}
               className="bg-Green-400 text-black p-2 rounded-md"
@@ -377,14 +340,13 @@ const drawPolygons = (fields) => {
           </div>
         </div>
 
-        )} 
+        ) : (
         
         <div className="flex-col">
-          <div className="mb-3 mt-3 ">
-          <span className="text-blueGray-500 text-md font-semibold text-center">Please Select Your Farm</span>
-          <button onClick={() => setIsModalOpen(true)} className="bg-blueGray-800 text-white active:bg-blueGray-600 text-sm font-bold uppercase py-2 px-4 rounded shadow hover:shadow-lg outline-none focus:outline-none mr-1 mb-1 w-full ease-linear transition-all focus:ring focus:ring-blue-300">Show Feilds</button>
-          </div>
-          {/* Dropdown button */}
+        <div>
+        <h1 className="text-center font-bold text-2xl mb-2">Fields</h1>
+        <span className="text-blueGray-500 text-md font-semibold text-center">Select Farm First</span>
+
           <div className="relative inline-block text-center w-full">
             <button
               onClick={() => setIsDropdownOpen(!isDropdownOpen)} // Toggle the dropdown when the button is clicked
@@ -410,14 +372,14 @@ const drawPolygons = (fields) => {
               </svg>
             </button>
             {isDropdownOpen && (
-              <div className="origin-top-right absolute right-0 mt-2 w-44 rounded-md shadow-lg bg-white ring-1 ring-black ring-opacity-5 divide-y divide-gray-100 focus:outline-none" role="menu" aria-orientation="vertical" aria-labelledby="dropdownButton" tabIndex="-1">
+              <div className="origin-top-right absolute right-0 mt-2 w-full rounded-md shadow-lg bg-white ring-1 ring-black ring-opacity-5 divide-y divide-gray-100 focus:outline-none" role="menu" aria-orientation="vertical" aria-labelledby="dropdownButton" tabIndex="-1">
                 <div className="py-1" role="none">
                   {options.map((option) => (
                     <button
                       key={option.id}
                       onClick={() => {
                         handleOptionSelect(option);
-                        handleFieldClick(); // Call the function to display and save farm data
+                       //handleFieldClick(); // Call the function to display and save farm data
                       }}
                       className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 hover:text-gray-900"
                       role="menuitem"
@@ -430,43 +392,55 @@ const drawPolygons = (fields) => {
             )}
           </div>
 
-          <div className="fields-list">
-              <h2 className="text-2xl font-bold mb-4 mt-4 text-center">Create Your Fields</h2>
-              
-          </div>
-          <p className="text-md  mb-3 mt-3 text-blueGray-500">
-            Draw Field on the Map
-          </p>
+        {fields.length === 0 ? (
+          <p>Please enter a farm to be displayed here.</p>
+        ) : (
+          <ul className="mt-8">
+            {/* {console.log("Fields are ",fields)} */}
+            {fields.map((field) => (
+              <div key={field.id} className="mb-3 flex flex-col">
+                <div className="flex justify-between items-center mb-2">
+                  <h3
+                    className="text-md font-semibold cursor-pointer"
+                    onClick={() => {
+                      handleFieldClick(field.coordinates);
+                    }}
+                  >
+                    Field Name: {field.field_name}
+                  </h3>
+                  <button
+                    onClick={() => {
+                      handleDelete(field.id);
+                      console.log("The button clicked is ", field.id);
+                    }}
+                    className="bg-red-500 text-white px-3 py-1 rounded hover:bg-red-600"
+                  >
+                    Delete
+                  </button>
+                </div>
+                <div>Crop: {field.field_crop}</div>
+              </div>
+            ))}
 
-          <button
-            onClick={onDrawField}
-            disabled={!selectedOption}
-            className={`text-white text-sm font-bold uppercase py-2 px-4 rounded shadow hover:shadow-lg outline-none focus:outline-none mr-1 mb-1 w-full ease-linear transition-all focus:ring focus:ring-blueGray-300  ${selectedOption ? "bg-blueGray-700 active:bg-blueGray-600" : "bg-blueGray-500 cursor-not-allowed"}`}
-            >
-            Draw Field
-          </button>
+          </ul>
+        )}
+                  <hr className="mt-6 border-b-1 border-blueGray-300" />
 
-          <p className="text-md  mb-3 mt-3 text-blueGray-500">
-            Upload File (shp, etc)
-          </p>
-          
-          <button
-            onClick={handleDrawField}
-            disabled={!selectedOption}
-            className={`text-white text-sm font-bold uppercase py-2 px-4 rounded shadow hover:shadow-lg outline-none focus:outline-none mr-1 mb-1 w-full ease-linear transition-all focus:ring focus:ring-blueGray-300  ${selectedOption ? "bg-blueGray-700 active:bg-blueGray-600" : "bg-blueGray-500 cursor-not-allowed"}`}
-          >
-            Upload Field
-          </button>
-          {/* Render the modal */}
-          <ReactModal
-            isOpen={isModalOpen}
-            onRequestClose={() => setIsModalOpen(false)}
-            style={modalStyles} // Apply the custom styles
-          >
-            {modalContent}
-          </ReactModal>
+      </div>
+
+              <div className="fixed bottom-0 mb-4">
+                <button 
+                    onClick={() => setShowDropdown(!showDropdown)}
+                    disabled={!selectedOption }
+                    className="bg-blueGray-800 text-white active:bg-blueGray-600 text-sm font-bold uppercase py-2 px-4 rounded shadow hover:shadow-lg outline-none focus:outline-none mr-1 mb-1 w-full ease-linear transition-all focus:ring focus:ring-blue-300"
+                    style={{ width: "60%"}}
+                >
+                    Create Fields
+                </button>
+                {showDropdown && dropdownContent}
+              </div>
         </div>
-      
+      )}
     </div>
   );
 }

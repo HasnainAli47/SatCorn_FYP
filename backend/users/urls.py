@@ -1,5 +1,5 @@
 from django.urls import path
-from .views import RegisterView, loginView, UserView, logoutView, VerifyOTPView, CreateFarmView, CreateSeasonView, UpdateSeasonView, DeleteSeasonView, DeleteFarmView, CreateFieldView, UpdateFieldView, DeleteFieldView, FieldListView, FarmListView, SeasonListView, CreateCropRotationView, UpdateCropRotationView, CropRotationListView
+from .views import RegisterView, loginView, UserView, logoutView, VerifyOTPView, CreateFarmView, CreateSeasonView, UpdateSeasonView, DeleteSeasonView, DeleteFarmView, CreateFieldView, UpdateFieldView, DeleteFieldView, FieldListView, FarmListView, SeasonListView, CreateCropRotationView, UpdateCropRotationView, CropRotationListView, DeleteCropRotationView
 # CreateFieldView, RetrieveFieldsView, DeleteFieldView, CalculateNDVIView
 
 
@@ -35,8 +35,9 @@ urlpatterns = [
     
     # Crop Rotation Handling
     path("create-crop-rotation", CreateCropRotationView.as_view(), name="create-crop-rotation"),
-    path("update-crop-rotation/<int:crop_rotation_id>", UpdateCropRotationView.as_view(), name="update-crop-rotation"),
+    path("update-crop-rotation/<int:season_id>/<int:field_id>", UpdateCropRotationView.as_view(), name="update-crop-rotation"),
     path("get-crop-rotations", CropRotationListView.as_view(), name="retrieve-crop-rotations"),
-    path("get-crop-rotations/<int:crop_rotation_id>", CropRotationListView.as_view(), name="retrieve-crop-rotations"),
+    path("get-crop-rotations/<int:season_id>/<int:field_id>", CropRotationListView.as_view(), name="get-crop-rotation"),
+    path("delete-crop-rotation/<int:crop_rotation_id>", DeleteCropRotationView.as_view(), name="delete-crop-rotation"),
     # path("calculate-ndvi/<int:field_id>", CalculateNDVIView.as_view(), name="calculate-ndvi"),
 ]

@@ -1,44 +1,166 @@
 import React, { useState } from "react";
 import DatePicker from "react-datepicker";
 import "react-datepicker/dist/react-datepicker.css";
+import axios from "axios";
+import ReactModal from "react-modal";
 
-export default function Season() {
-  const initialFormData = {
+
+// Add CSS styles for the modal and backdrop
+const modalStyles = {
+  overlay: {
+    backgroundColor: "rgba(0, 0, 0, 0.7)", // Semi-transparent black backdrop
+    zIndex: 1000, // Ensure modal appears on top
+    position: "fixed",
+    top: 0,
+    left: 0,
+    right: 0,
+    bottom: 0,
+  },
+  content: {
+    position: "absolute",
+    top: "50%",
+    left: "50%",
+    transform: "translate(-50%, -50%)",
+    background: "white",
+    borderRadius: "8px",
+    padding: "20px",
+    maxWidth: "80%",
+    maxHeight: "100%",
+    height: "60%",
+
+    overflow: "auto",
+    zIndex: 1001, // Ensure modal content appears above the backdrop
+  },
+};
+
+export default function Season({ seasonData, isModalOpen, setIsModalOpen, seasonId  }) {
+  console.log("The season data recived is ", seasonData);
+  
+  const initialFormData = seasonData ? {
+    seasonName: seasonData.season_name || "",
+    startDate: seasonData.start_date ? new Date(seasonData.start_date) : null,
+    endDate: seasonData.end_date ? new Date(seasonData.end_date) : null
+  } : {
     seasonName: "",
     startDate: null,
-    endDate: null,
+    endDate: null
   };
 
   const [formData, setFormData] = useState(initialFormData);
+  const [name, setName] = useState(seasonData ? seasonData.season_name : '');
+  const [startDate, setStartDate] = useState(seasonData ? seasonData.start_date : '');
+  const [endDate, setEndDate] = useState(seasonData ? seasonData.end_date : '');
 
   const handleInputChange = (e) => {
     const { name, value } = e.target;
-    setFormData({
-      ...formData,
+    setFormData((prevFormData) => ({
+      ...prevFormData,
       [name]: value,
-    });
+    }));
   };
+  
 
   // Handle date changes
   const handleStartDateChange = (date) => {
-    setFormData({
-      ...formData,
-      startDate: date,
-    });
+    let day = new Date(date).getDate();
+    let month = (new Date(date).getMonth()) + 1;
+    let year = new Date(date).getFullYear();
+    let dateString = year+"-"+month+"-"+day;
+    setStartDate(dateString);
+
+  setFormData({
+    ...formData,
+    startDate: date
+  });
   };
 
   const handleEndDateChange = (date) => {
+    let day = new Date(date).getDate();
+    let month = (new Date(date).getMonth())+1;
+    let year = new Date(date).getFullYear();
+    let dateString = year+"-"+month+"-"+day;
+    console.log(dateString);
+    setEndDate(dateString);
+
     setFormData({
       ...formData,
       endDate: date,
     });
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    // Handle form submission here
-    console.log("Form Data:", formData);
+
+    const formDataToSend = {
+      season_name: name, 
+      start_date: startDate, 
+      end_date: endDate, 
+    };
+
+    let requestUrl;
+    let requestMethod;
+
+    if (seasonId) {
+      // If the season ID is available, then it's an update operation
+      requestUrl = `http://127.0.0.1:8000/api/update-season/${seasonId}`;
+      requestMethod = 'POST';  // Or 'PATCH' if your API requires
+    } else {
+      // Else, it's a create operation
+      requestUrl = 'http://127.0.0.1:8000/api/create-season';
+      requestMethod = 'POST';
+    }
+    console.log("Sending to submit form data is ", formDataToSend);
+
+    try {
+      const response = await axios({
+        url: requestUrl,
+        method: requestMethod,
+        data: formDataToSend,
+        withCredentials: true, // Include credentials in the request
+      });
+  
+      if (response.status !== 201) {
+        console.log('Error:', response.data);
+        // Close the modal after a successful operation
+        setIsModalOpen(false);
+        window.location.reload();
+      } else {
+        console.log('Response:', response.data);
+        // Close the modal after a successful operation
+        setIsModalOpen(false);
+      }
+      // Handle the response as needed
+    } catch (error) {
+      console.error('Error:', error);
+      // Handle errors
+    }
   };
+  
+
+
+  const handleDelete = async () => {
+    try {
+        if (seasonData && seasonData.id) {
+            const response = await axios.delete(`http://127.0.0.1:8000/api/delete-season/${seasonData.id}`, {
+                withCredentials: true,
+            });
+            if (response.status === 200) {
+                console.log('Successfully deleted:', response.data);
+                setIsModalOpen(false);
+                window.location.reload();
+            } else {
+                console.error('Error during deletion:', response.data);
+            }
+        } else {
+            console.error('No season ID provided for deletion');
+        }
+    } catch (error) {
+        console.error('Error:', error);
+    }
+};
+
+
+
 
   const handleCancel = () => {
     // Reset the form data to its initial state
@@ -50,16 +172,20 @@ export default function Season() {
   // Add a new state variable to manage the "Cancel" button's disabled state
   const [cancelDisabled, setCancelDisabled] = useState(false);
 
-  return (
-    <>
-      <main className="min-h-screen flex items-center">
-        <div className="container mt-10 mx-auto px-4 h-full">
-          <div className="flex content-center items-center justify-left h-full">
-            <div className="w-full lg:w-8/12 md:w-auto px-4">
-              <div className="relative flex flex-col min-w-0 break-words w-full mb-6 shadow-lg rounded-lg bg-white border-0">
-                <div className="flex-auto px-4 lg:px-10 py-10 pt-0">
+
+  // Define the modal content
+  const modalContent = (
+    <div className="relative">
+      <button
+      onClick={() => setIsModalOpen(false)}
+      className="absolute top-0 right-0 mt-0 mr-0 bg-transparent border-0 text-black hover:text-gray-500 text-2xl leading-none outline-none focus:outline-none"
+      >
+        <span>&times;</span>
+      </button>
+
+      <div className="flex-auto px-4 lg:px-10 py-10 pt-0">
                   <h2 className="text-2xl font-bold mb-4 mt-4 text-center">
-                    Create Season
+                  {seasonData ? "Update Season" : "Create Season"}
                   </h2>
                   <form onSubmit={handleSubmit}>
                     <div className="mb-4">
@@ -160,21 +286,39 @@ export default function Season() {
                       >
                         Cancel
                       </button>
-                      {/* Submit Button */}
+                      
                       <button
                         type="submit"
                         className="bg-blueGray-800 text-white active:bg-blueGray-600 font-bold uppercase text-sm px-1 py-1 rounded shadow hover:shadow-lg outline-none focus:outline-none mr-1 mb-1 w-6/12 h-10 transition-all ease-in-out duration-200"
-                      >
-                        Create Season
-                      </button>
+                    >
+                        {seasonData ? "Update Season" : "Create Season"}
+                    </button>
+
+                    {/* Conditionally rendered Delete Button */}
+                    {seasonData && (
+                        <button
+                            onClick={handleDelete}
+                            className="bg-red-500 text-white active:bg-red-300 font-bold uppercase text-sm px-1 py-1 rounded shadow hover:shadow-lg outline-none focus:outline-none mr-1 mb-1 w-6/12 h-10 transition-all ease-in-out duration-200"
+                        >
+                            Delete
+                        </button>
+                    )}
                     </div>
                   </form>
                 </div>
-              </div>
-            </div>
-          </div>
-        </div>
-      </main>
+
+      </div>
+    );
+
+  return (
+    <>
+      <ReactModal
+         isOpen={isModalOpen}
+        onRequestClose={() => setIsModalOpen(false)}
+        style={modalStyles} // Apply the custom styles
+          >            
+      {modalContent}
+    </ReactModal>
     </>
   );
 }

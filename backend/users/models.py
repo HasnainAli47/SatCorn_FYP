@@ -34,9 +34,8 @@ class Field(models.Model):
 class Season(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE)
     season_name = models.CharField(max_length=255, default="Season")
-    start_date = models.DateField()
-    end_date = models.DateField()
-    fields = models.ManyToManyField(Field, related_name='seasons')
+    start_date = models.DateField(null=True, blank=True, default='2000-01-01')
+    end_date = models.DateField(null=True, blank=True, default='2000-01-02')
 
     class Meta:
         unique_together = ('user', 'start_date', 'end_date')
@@ -46,12 +45,12 @@ class Season(models.Model):
 
 
 class CropRotation(models.Model):
-    seasons = models.ManyToManyField(Season, related_name='crop_rotations')
+    season = models.ForeignKey(Season, on_delete=models.CASCADE, related_name='crop_rotations')
     field = models.ForeignKey(Field, on_delete=models.CASCADE, related_name='crop_rotations')
-    crop_name = models.CharField(max_length=255, null=True, blank=True, default=None)
-    planting_date = models.DateField(null=True, blank=True, default=None)
-    harvesting_date = models.DateField(null=True, blank=True, default=None)
-    crop_variety = models.CharField(max_length=255, null=True, blank=True, default=None)
+    crop_name = models.CharField(max_length=255, null=True, blank=True, default='Unknown Crop')
+    planting_date = models.DateField(null=True, blank=True, default='2000-01-01')
+    harvesting_date = models.DateField(null=True, blank=True, default='2000-01-02')
+    crop_variety = models.CharField(max_length=255, null=True, blank=True, default='Unknown Variety')
 
     def __str__(self):
         return f'{self.crop_name} in {self.field}'
