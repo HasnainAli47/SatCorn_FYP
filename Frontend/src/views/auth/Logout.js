@@ -1,0 +1,35 @@
+import React, { useEffect } from 'react';
+//import Axios from 'axios';
+import { useHistory } from 'react-router-dom';
+
+function Logout() {
+  const history = useHistory();
+
+  const handleLogout = async () => {
+    // try {
+    //   // Make an HTTP request to log the user out
+    //   await Axios.post('http://127.0.0.1:8000/api/logout', {
+    //     headers: {
+    //         'Content-Type': 'application/json',
+    //       },
+    //       withCredentials: true, // Include cookies with the request
+    //   });
+
+    //   // Redirect to the login page or any other authorized route
+    //   history.push('/login');
+    // } catch (error) {
+    //   console.error('Logout failed', error);
+    // }
+  };
+
+  useEffect(() => {
+    handleLogout();
+  }, [history]);
+
+  return (
+    // You can render a loading indicator or message here
+    <div>Logging out...</div>
+  );
+}
+
+export default Logout;

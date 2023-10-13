@@ -17,6 +17,8 @@ import Profile from "views/Profile.js";
 import Index from "views/Index.js";
 import Login from "views/auth/Login";
 import Register from "views/auth/Register";
+import VerifyOtp from "views/auth/VerifyOTP";
+import Logout from "views/auth/Logout";
 
 ReactDOM.render(
   <BrowserRouter>
@@ -25,6 +27,8 @@ ReactDOM.render(
       <Route path="/admin" component={Admin} />
       <Route path="/login" component={Login} />
       <Route path="/register" component={Register} />
+      <Route path="/verifyotp" component={VerifyOtp} />
+      <Route path="/logout" component = {Logout} />
 
       {/* add routes without layouts */}
       <Route path="/" exact component={Landing} />

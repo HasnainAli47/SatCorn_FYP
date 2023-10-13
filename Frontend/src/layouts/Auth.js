@@ -1,17 +1,15 @@
 import React from "react";
 import { Switch, Route, Redirect } from "react-router-dom";
-
-// components
-
 import Navbar from "components/Navbars/AuthNavbar.js";
-// import FooterSmall from "components/Footers/FooterSmall.js";
-
-// views
-
 import Login from "views/auth/Login.js";
 import Register from "views/auth/Register.js";
+// import VerifyOtp from "views/auth/VerifyOTP.js";
+import VerifyOtp from "views/auth/VerifyOTP.js";
+import Logout from "views/auth/Logout.js";
+
 
 export default function Auth() {
+  
   return (
     <>
       <Navbar transparent />
@@ -27,9 +25,10 @@ export default function Auth() {
           <Switch>
             <Route path="/login" exact component={Login} />
             <Route path="/register" exact component={Register} />
+            <Route path="/verifyotp" exact component={VerifyOtp} />
+            <Route path="/logout" exact component={Logout} />
             <Redirect from="/" to="/login" />
           </Switch>
-          {/* <FooterSmall absolute /> */}
         </section>
       </main>
     </>

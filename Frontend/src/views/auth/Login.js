@@ -1,17 +1,47 @@
-import React from "react";
+import React, {useEffect} from "react";
 import { Link } from "react-router-dom";
 import { useState } from "react";
 import { useForm } from "react-hook-form";
 // import Navbar from "components/Navbars/AuthNavbar.js";
 import FooterSmall from "components/Footers/FooterSmall.js";
+//import Axios from "axios";
+//import { Rings } from "react-loader-spinner";
+import { useHistory } from "react-router-dom";
+
+
 
 export default function Login() {
+  const history = useHistory();
+
+  // useEffect(() => {
+  //   // Check if the user is already logged in
+  //   async function checkUserLogin() {
+  //     try {
+  //       const response = await Axios.get('http://127.0.0.1:8000/api/user', {
+  //         withCredentials: true, // Include cookies with the request
+  //       });
+    
+  //       if (response.status === 200) {
+  //       history.push("/admin/maps"); // Redirect to the login page or any other authorized route
+  //       }
+  //     } catch (error) {
+  //       console.log("No, you are not logged in", error);
+        
+  //     }
+  //   }
+  //   checkUserLogin();
+  // }, [history]);
+
+  
   const { register, handleSubmit } = useForm(); // Use useForm
   const [inputs, setInputs] = useState({
     email: "",
     password: "",
     agree: false,
   });
+  const [successMessage, setSuccessMessage] = useState(null);
+  const [errorMessage, setErrorMessage] = useState(null);
+  const [loading, setLoading] = useState(false);
 
   const handleChange = (e) => {
     setInputs((prevState) => ({
@@ -20,20 +50,55 @@ export default function Login() {
     }));
   };
 
-  const onSubmit = (data) => {
-    console.log(data);
-    // Add your signup logic here
-
-    // Reset the form fields and state
-    resetState();
+  const onSubmit = async (data) => {
+    // try {
+    //   setLoading(true);
+  
+    //   const response = await Axios.post('http://127.0.0.1:8000/api/login', data, {
+    //     headers: {
+    //       'Content-Type': 'application/json',
+    //     },
+    //     withCredentials: true, // Include cookies with the request
+    //   });
+  
+    //   setLoading(false);
+  
+    //   if (response.status === 200) {
+    //     setSuccessMessage('Login successful');
+    //     setErrorMessage(null);
+    //     setTimeout(() => {
+    //       setSuccessMessage(null);
+    //     }, 5000);
+    //     // Redirect to the /admin/maps route using history
+    //     history.push('/admin/maps');
+    //     // Add your logic for successful login (e.g., redirect)
+    //   } else {
+    //     setErrorMessage('Email or password Incorrect');
+    //     setSuccessMessage(null);
+    //     setTimeout(() => {
+    //       setErrorMessage(null);
+    //     }, 5000);
+    //   }
+    // } catch (error) {
+    //   setLoading(false);
+    //   setErrorMessage('Email or password Incorrect');
+    //   setSuccessMessage(null);
+    //   setTimeout(() => {
+    //     setErrorMessage(null);
+    //   }, 5000);
+    // }
   };
-
   const resetState = () => {
     // Reset the form fields and state
     setInputs({ email: "", password: "", agree: false });
   };
   return (
     <>
+    {loading && (
+        <div className="fixed top-0 left-0 w-full h-full flex items-center justify-center z-50">
+          {/* <Rings color="#00BFFF" height={80} width={80} /> */}
+        </div>
+      )}
       {/* <Navbar transparent /> */}
       <div
         className="bg-cover bg-center min-h-screen"
@@ -51,6 +116,27 @@ export default function Login() {
                     <div className="text-blueGray-600 h-full text-center mb-4 mt-6  font-bold text-lg">
                       <span>LOGIN</span>
                     </div>
+
+
+
+
+                    <div className="text-white text-center mb-2">
+                      {successMessage && (
+                        <p className="bg-teal-500 bg-opacity-40 text-lg p-2 rounded-lg">
+                          {successMessage}
+                        </p>
+                      )}
+                    </div>
+                    <div className="text-white text-center mb-2">
+                      {errorMessage && (
+                        <p className="bg-red-500 bg-opacity-40 text-lg p-2 rounded-lg">
+                          {errorMessage}
+                        </p>
+                      )}
+                    </div>
+
+
+
                     <form onSubmit={handleSubmit(onSubmit)}>
                       <div className="relative w-full mb-3">
                         <label

@@ -1,11 +1,14 @@
 import React from "react";
 
+
+
 // components
 
 import MapExample from "components/Maps/MapExample.js";
 import NewSidebar from "components/Maps/NewSidebar";
 
 export default function Maps() {
+  
   return (
     <>
       <div className="relative flex w-full">
