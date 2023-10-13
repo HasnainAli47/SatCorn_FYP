@@ -68,7 +68,6 @@ function Cropsrotation() {
         SeasonDetails={seasonDetails}
         />
         
-        {/* ... [Rest of your code for ReactModal] */}
     </div>
 );
 }

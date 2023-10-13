@@ -62,42 +62,55 @@ function Side({ selectedSeason, selectedFarm , FormsData }) {
 
 
 
+ // changing handlesubmit to access dummy data for now
+  // const handleSubmit = async (e) => {
+  //     e.preventDefault();
 
-  const handleSubmit = async (e) => {
-      e.preventDefault();
+  //     const dataToSend = {
+  //         crop_name: formData.cropName,
+  //         planting_date: formData.plantingDate ? formData.plantingDate.toISOString().split('T')[0] : null,
+  //         harvesting_date: formData.harvestingDate ? formData.harvestingDate.toISOString().split('T')[0] : null,
+  //         crop_variety: formData.cropVariety
+  //     };
 
-      const dataToSend = {
-          crop_name: formData.cropName,
-          planting_date: formData.plantingDate ? formData.plantingDate.toISOString().split('T')[0] : null,
-          harvesting_date: formData.harvestingDate ? formData.harvestingDate.toISOString().split('T')[0] : null,
-          crop_variety: formData.cropVariety
-      };
-
-      // try {
-      //     let response;
-      //     if (modalMode === 'add') {
-      //         response = await Axios.post("http://127.0.0.1:8000/api/create-crop-rotation", {
-      //             ...dataToSend,
-      //             season: selectedSeason?.id,
-      //             field: selectedField
-      //         }, {
-      //             withCredentials: true
-      //         });
-      //     } else if (modalMode === 'edit' && selectedSeason && selectedField) {
-      //         response = await Axios.post(`http://127.0.0.1:8000/api/update-crop-rotation/${selectedSeason?.id}/${selectedField}`, dataToSend, {
-      //             withCredentials: true
-      //         });
-      //     }
+  //     // try {
+  //     //     let response;
+  //     //     if (modalMode === 'add') {
+  //     //         response = await Axios.post("http://127.0.0.1:8000/api/create-crop-rotation", {
+  //     //             ...dataToSend,
+  //     //             season: selectedSeason?.id,
+  //     //             field: selectedField
+  //     //         }, {
+  //     //             withCredentials: true
+  //     //         });
+  //     //     } else if (modalMode === 'edit' && selectedSeason && selectedField) {
+  //     //         response = await Axios.post(`http://127.0.0.1:8000/api/update-crop-rotation/${selectedSeason?.id}/${selectedField}`, dataToSend, {
+  //     //             withCredentials: true
+  //     //         });
+  //     //     }
           
-      //     if (response.status === 200) {
-      //         console.log("Data successfully processed!");
-      //     }
-      // } catch (error) {
-      //     console.error("Error processing data:", error);
-      // }
+  //     //     if (response.status === 200) {
+  //     //         console.log("Data successfully processed!");
+  //     //     }
+  //     // } catch (error) {
+  //     //     console.error("Error processing data:", error);
+  //     // }
 
-      setIsModalOpen(false)
-  };
+  //     setIsModalOpen(false)
+  // };
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+
+    const formDataToSend = {
+      crop_name: name, 
+      plant_date: plantingDate, 
+      harvest_date: harvestingDate, 
+      crop_variety: cropVariety
+    };
+
+    console.log("Sending to submit form data is ", formDataToSend);
+    setIsModalOpen(false)
+  }
 
 
 
@@ -147,15 +160,59 @@ const handleDelete = async () => {
   // }
   setIsModalOpen(false);
 }
+  //dummy fields 
+  const [fields, setFields] = useState([
+    [
+      {
+          "id": 4,
+          "field_name": "Field 2",
+          "coordinates": [
+              {
+                  "latitude": 123.45678,
+                  "longitude": 45.6891
+              },
+              {
+                  "latitude": 123.45789,
+                  "longitude": 45.679123
+              },
+              {
+                  "latitude": 123.458901,
+                  "longitude": 45.1679234
+              }
+          ],
+          "farm": 12,
+          "field_crop": "Corn"
+      },
+      {
+          "id": 5,
+          "field_name": "Field 4",
+          "coordinates": [
+              {
+                  "lat": 123.45678,
+                  "lng": 45.6891
+              },
+              {
+                  "lat": 123.45789,
+                  "lng": 45.679123
+              },
+              {
+                  "lat": 123.458901,
+                  "lng": 45.1679234
+              }
+          ],
+          "farm": 12,
+          "field_crop": "Corn"
+      }
+  ]
+  ]);
 
-
-
-    const [fields, setFields] = useState(FormsData || []);
-    useEffect(() => {
-        if (FormsData) {
-            setFields(FormsData);
-        }
-    }, [FormsData, isModalOpen]);
+    // for now 'dummy data is used'
+    // const [fields, setFields] = useState(FormsData || []);
+    // useEffect(() => {
+    //     if (FormsData) {
+    //         setFields(FormsData);
+    //     }
+    // }, [FormsData, isModalOpen]);
 
 
     async function fetchCropRotations(seasonId, fieldId) {
@@ -326,7 +383,7 @@ const modalContent = (
                     <button
                         type="button"
                         onClick={handleCancel}
-                        className="bg-red-500 text-white active:bg-red-300 font-bold uppercase text-sm px-1 py-1 rounded shadow hover:shadow-lg outline-none focus:outline-none mr-1 mb-1 w-6/12 h-10 transition-all ease-in-out duration-200"
+                        className="bg-slate-500 text-white active:bg-red-300 font-bold uppercase text-sm px-1 py-1 rounded shadow hover:shadow-lg outline-none focus:outline-none mr-1 mb-1 w-6/12 h-10 transition-all ease-in-out duration-200"
                       >
                         Cancel
                     </button>
@@ -342,14 +399,14 @@ const modalContent = (
                     {modalMode === 'edit' ? (
                         <button
                             type="submit"
-                            className="bg-blueGray-800 text-white active:bg-blueGray-600 font-bold uppercase text-sm px-1 py-1 rounded shadow hover:shadow-lg outline-none focus:outline-none mr-1 mb-1 w-6/12 h-10 transition-all ease-in-out duration-200"
+                            className="bg-sky-600 text-white active:bg-blueGray-600 font-bold uppercase text-sm px-1 py-1 rounded shadow hover:shadow-lg outline-none focus:outline-none mr-1 mb-1 w-6/12 h-10 transition-all ease-in-out duration-200"
                         >
                             Update
                         </button>
                     ) : (
                         <button
                             type="submit"
-                            className="bg-blueGray-800 text-white active:bg-blueGray-600 font-bold uppercase text-sm px-1 py-1 rounded shadow hover:shadow-lg outline-none focus:outline-none mr-1 mb-1 w-6/12 h-10 transition-all ease-in-out duration-200"
+                            className="bg-sky-600 text-white active:bg-blueGray-600 font-bold uppercase text-sm px-1 py-1 rounded shadow hover:shadow-lg outline-none focus:outline-none mr-1 mb-1 w-6/12 h-10 transition-all ease-in-out duration-200"
                         >
                             Submit
                         </button>
@@ -365,7 +422,7 @@ const modalContent = (
   return (
     <>
     <div className="flex h-screen w-full mt-4">
-    <div className="fields-container relative w-4/14 rounded h-60">
+    {/* <div className="fields-container relative w-4/14 rounded h-60">
             <table className="w-full border">
                 <thead>
                   <tr>
@@ -376,7 +433,7 @@ const modalContent = (
                   </tr>
                 </thead>
                 <tbody>
-                    {fields.map((field) => (
+                    {fields[0].map((field) => (
                         <tr key={field.id}>
                             <td className="border px-4 py-2">{field.field_name}</td>
                         </tr>
@@ -385,8 +442,85 @@ const modalContent = (
 
 
             </table>
+        </div> */}
+        <div className="fields-container relative rounded h-auto p-4 bg-white shadow-md" style={{width: "40%"}}>
+            <div className="flex justify-center items-center mb-4">
+                <h2 className="text-xl font-bold">{selectedFarm?.farm_name || "Farm Name"}</h2>
+            </div>
+
+            <div className="my-2 flex justify-center items-center ">
+                <span>Your Fields</span>
+            </div>
+                
+                {fields[0].map((field) => (
+                  <div key={field.id} className="p-2 bg-lightBlue-200 flex justify-center items-center rounded mb-4">
+                      {field.field_name}
+                  </div>
+                ))}
+              
+            
         </div>
-        <div className="season-container relative rounded h-60 z-0 w-4/14">
+
+        <div className="season-container relative rounded h-auto p-4 bg-white shadow-md" style={{width: "50%"}}>
+              <div className="flex justify-center items-center mb-4">
+              <h2 className="text-xl font-bold">{selectedSeason?.season_name || "Season"}</h2>
+              </div>
+
+              <div className="flex my-2 justify-center items-center ">
+                  <span>Start Date: {selectedSeason?.start_date}</span>
+                  <span className="mx-4">End Date: {selectedSeason?.end_date}</span>
+              </div>
+
+              {fields[0].map((field, index) => {
+                  const rotation = cropRotations[index];
+                  return (
+                      <div
+                          key={field.id}
+                          onMouseEnter={() => setHoveredRow(index)}
+                          onMouseLeave={() => setHoveredRow(null)}
+                          className="p-2 bg-emerald-200 rounded mb-4 flex justify-center items-center"
+                      >
+                          {hoveredRow === index ? 
+                              rotation && rotation.crop_name ? (
+                                  <div className="flex flex-col">
+                                      <span>
+                                          {rotation.crop_name}
+                                          <span className="ml-2">({rotation.planting_date} to {rotation.harvesting_date})</span>
+                                      </span>
+                                      <span className="text-xs mt-1">Crop Variety: {rotation.crop_variety}</span>
+                                      <button 
+                                          className="bg-blueGray-600 text-white px-2 py-0.5 rounded mt-2"
+                                          onClick={() => {handleEdit(index, rotation.id);setModalMode('edit');}}
+                                      >
+                                          Edit Crop
+                                      </button>
+                                  </div>
+                              ) : (
+                                  <button
+                                      className="text-black px-2 py-0.5 rounded"
+                                      onClick={() => {setIsModalOpen(true);setModalMode('add');setFormData({cropName: "",plantingDate: null,harvestingDate: null,cropVariety: ""});setSelectedField(field.id)}}
+                                  >
+                                      +Add Crop
+                                  </button>
+                              )
+                          : rotation && rotation.crop_name ? (
+                              <div className="flex flex-col">
+                                  <span>
+                                      {rotation.crop_name}
+                                      <span className="ml-2">({rotation.planting_date} to {rotation.harvesting_date})</span>
+                                  </span>
+                                  <span className="text-xs mt-1">Crop Variety: {rotation.crop_variety}</span>
+                              </div>
+                          ) : (
+                              <span>None</span>
+                          )}
+                      </div>
+                  );
+              })}
+          </div>
+
+
+        {/* <div className="season-container relative rounded h-60 z-0 w-4/14">
             
             <table className="w-full border">
                 <thead>
@@ -403,12 +537,7 @@ const modalContent = (
                       </td>
                 </tr>
                 
-                
-
-
-
-
-                {fields.map((field, index) => {
+                {fields[0].map((field, index) => {
                   const rotation = cropRotations[index];
                   return (
                     <tr
@@ -446,14 +575,9 @@ const modalContent = (
                   );
                 })}
 
-
-
-
-
-
                 </tbody>
             </table>
-        </div>
+        </div> */}
       </div>
       <ReactModal
          isOpen={isModalOpen}

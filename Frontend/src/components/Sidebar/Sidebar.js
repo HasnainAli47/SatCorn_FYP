@@ -110,6 +110,8 @@ export default function Sidebar({ onToggleSidebar }) {
 
   function SidebarItem({ icon, text, to, expanded, children }) {
     const [isDropdownOpen, setIsDropdownOpen] = useState(false);
+    const [isDropdownVisible, setDropdownVisible] = useState(false);
+
   
     const handleDropdownToggle = (e) => {
       e.preventDefault();
@@ -223,7 +225,7 @@ export default function Sidebar({ onToggleSidebar }) {
         
         ))}
         <li className="my-2 ml-2">
-        <button onClick={() => openModal()} className="bg-blueGray-600 text-white px-4 py-2 ml-2 mb-2">+ Add new season</button>
+        <button onClick={() => openModal()} className="bg-blueGray-600 hover:bg-green-500 text-white px-4 py-2 ml-2 mb-2">+ Add new season</button>
 
 
         </li>

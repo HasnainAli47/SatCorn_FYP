@@ -350,7 +350,7 @@ function NewSidebar({
           <div className="relative inline-block text-center w-full">
             <button
               onClick={() => setIsDropdownOpen(!isDropdownOpen)} // Toggle the dropdown when the button is clicked
-              className="text-white bg-blueGray-700 hover:bg-blueGray-600 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm px-4 py-2 w-full text-center inline-flex items-center dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800 flex"
+              className="text-white bg-blueGray-700 hover:bg-emerald-800 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm px-4 py-2 w-full text-center inline-flex items-center dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800 flex"
               type="button"
               id="dropdownButton"
             >
@@ -432,7 +432,7 @@ function NewSidebar({
                 <button 
                     onClick={() => setShowDropdown(!showDropdown)}
                     disabled={!selectedOption }
-                    className="bg-blueGray-800 text-white active:bg-blueGray-600 text-sm font-bold uppercase py-2 px-4 rounded shadow hover:shadow-lg outline-none focus:outline-none mr-1 mb-1 w-full ease-linear transition-all focus:ring focus:ring-blue-300"
+                    className="bg-green-500 text-white active:bg-blueGray-600 text-sm font-bold uppercase py-2 px-4 rounded shadow hover:shadow-lg outline-none focus:outline-none mr-1 mb-1 w-full ease-linear transition-all focus:ring focus:ring-blue-300"
                     style={{ width: "60%"}}
                 >
                     Create Fields

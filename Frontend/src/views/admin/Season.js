@@ -282,19 +282,11 @@ export default function Season({ seasonData, isModalOpen, setIsModalOpen, season
                       <button
                         type="button"
                         onClick={handleCancel}
-                        className="bg-red-500 text-white active:bg-red-300 font-bold uppercase text-sm px-1 py-1 rounded shadow hover:shadow-lg outline-none focus:outline-none mr-1 mb-1 w-6/12 h-10 transition-all ease-in-out duration-200"
+                        className="bg-slate-500 text-white active:bg-red-300 font-bold uppercase text-sm px-1 py-1 rounded shadow hover:shadow-lg outline-none focus:outline-none mr-1 mb-1 w-6/12 h-10 transition-all ease-in-out duration-200"
                       >
                         Cancel
                       </button>
-                      
-                      <button
-                        type="submit"
-                        className="bg-blueGray-800 text-white active:bg-blueGray-600 font-bold uppercase text-sm px-1 py-1 rounded shadow hover:shadow-lg outline-none focus:outline-none mr-1 mb-1 w-6/12 h-10 transition-all ease-in-out duration-200"
-                    >
-                        {seasonData ? "Update Season" : "Create Season"}
-                    </button>
-
-                    {/* Conditionally rendered Delete Button */}
+                      {/* Conditionally rendered Delete Button */}
                     {seasonData && (
                         <button
                             onClick={handleDelete}
@@ -303,6 +295,14 @@ export default function Season({ seasonData, isModalOpen, setIsModalOpen, season
                             Delete
                         </button>
                     )}
+                      <button
+                        type="submit"
+                        className="bg-sky-600 text-white active:bg-blueGray-600 font-bold uppercase text-sm px-1 py-1 rounded shadow hover:shadow-lg outline-none focus:outline-none mr-1 mb-1 w-6/12 h-10 transition-all ease-in-out duration-200"
+                    >
+                        {seasonData ? "Update Season" : "Create Season"}
+                    </button>
+
+                    
                     </div>
                   </form>
                 </div>

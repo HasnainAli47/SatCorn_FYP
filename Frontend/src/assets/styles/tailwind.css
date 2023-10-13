@@ -1095,6 +1095,11 @@ select {
   background-color: rgba(255, 255, 255, var(--tw-bg-opacity));
 }
 
+.bg-green-500 {
+  --tw-bg-opacity: 1;
+  background-color: rgba(34, 197, 94, var(--tw-bg-opacity));
+}
+
 .bg-pink-500 {
   --tw-bg-opacity: 1;
   background-color: rgba(236, 72, 153, var(--tw-bg-opacity));
@@ -1103,6 +1108,31 @@ select {
 .bg-purple-200 {
   --tw-bg-opacity: 1;
   background-color: rgba(233, 213, 255, var(--tw-bg-opacity));
+}
+
+.bg-lime-950 {
+  --tw-bg-opacity: 1;
+  background-color: rgba(26, 46, 5, var(--tw-bg-opacity));
+}
+
+.bg-teal-800 {
+  --tw-bg-opacity: 1;
+  background-color: rgba(17, 94, 89, var(--tw-bg-opacity));
+}
+
+.bg-emerald-700 {
+  --tw-bg-opacity: 1;
+  background-color: rgba(4, 120, 87, var(--tw-bg-opacity));
+}
+
+.bg-slate-500 {
+  --tw-bg-opacity: 1;
+  background-color: rgba(100, 116, 139, var(--tw-bg-opacity));
+}
+
+.bg-sky-600 {
+  --tw-bg-opacity: 1;
+  background-color: rgba(2, 132, 199, var(--tw-bg-opacity));
 }
 
 .bg-purple-500 {
@@ -1173,6 +1203,11 @@ select {
 .bg-emerald-500 {
   --tw-bg-opacity: 1;
   background-color: rgba(16, 185, 129, var(--tw-bg-opacity));
+}
+
+.bg-emerald-800 {
+  --tw-bg-opacity: 1;
+  background-color: rgba(6, 95, 70, var(--tw-bg-opacity));
 }
 
 .bg-yellow-500 {
@@ -2375,6 +2410,16 @@ select {
   color: rgba(244, 114, 182, var(--tw-text-opacity));
 }
 
+.text-cyan-950 {
+  --tw-text-opacity: 1;
+  color: rgba(8, 51, 68, var(--tw-text-opacity));
+}
+
+.text-sky-700 {
+  --tw-text-opacity: 1;
+  color: rgba(3, 105, 161, var(--tw-text-opacity));
+}
+
 .text-lightBlue-300 {
   --tw-text-opacity: 1;
   color: rgba(125, 211, 252, var(--tw-text-opacity));
@@ -2460,6 +2505,46 @@ select {
   color: rgba(2, 132, 199, var(--tw-text-opacity));
 }
 
+.hover\:text-sky-700:hover {
+  --tw-text-opacity: 1;
+  color: rgba(3, 105, 161, var(--tw-text-opacity));
+}
+
+.hover\:bg-emerald-200:hover {
+  --tw-bg-opacity: 1;
+  background-color: rgba(167, 243, 208, var(--tw-bg-opacity));
+}
+
+.hover\:text-emerald-200:hover {
+  --tw-text-opacity: 1;
+  color: rgba(167, 243, 208, var(--tw-text-opacity));
+}
+
+.hover\:text-emerald-800:hover {
+  --tw-text-opacity: 1;
+  color: rgba(6, 95, 70, var(--tw-text-opacity));
+}
+
+.hover\:bg-emerald-800:hover {
+  --tw-bg-opacity: 1;
+  background-color: rgba(6, 95, 70, var(--tw-bg-opacity));
+}
+
+.hover\:bg-lightBlue-200:hover {
+  --tw-bg-opacity: 1;
+  background-color: rgba(186, 230, 253, var(--tw-bg-opacity));
+}
+
+.hover\:text-cyan-950:hover {
+  --tw-text-opacity: 1;
+  color: rgba(8, 51, 68, var(--tw-text-opacity));
+}
+
+.hover\:text-teal-950:hover {
+  --tw-text-opacity: 1;
+  color: rgba(4, 47, 46, var(--tw-text-opacity));
+}
+
 .hover\:text-blueGray-300:hover {
   --tw-text-opacity: 1;
   color: rgba(203, 213, 225, var(--tw-text-opacity));
@@ -2478,6 +2563,11 @@ select {
 .hover\:text-blueGray-800:hover {
   --tw-text-opacity: 1;
   color: rgba(30, 41, 59, var(--tw-text-opacity));
+}
+
+.hover\:bg-green-500:hover {
+  --tw-bg-opacity: 1;
+  background-color: rgba(34, 197, 94, var(--tw-bg-opacity));
 }
 
 .uppercase {
