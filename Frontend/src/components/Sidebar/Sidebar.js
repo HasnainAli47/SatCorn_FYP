@@ -12,6 +12,7 @@ import { bottom } from "@popperjs/core";
 
 export default function Sidebar({ onToggleSidebar }) {
   const [expanded, setExpanded] = useState(false);
+  const [isDropdownVisible, setDropdownVisible] = useState(false);
   const [name, setname] = useState('');
   const [email, setEmail] = useState('');
   const history = useHistory();
@@ -110,8 +111,6 @@ export default function Sidebar({ onToggleSidebar }) {
 
   function SidebarItem({ icon, text, to, expanded, children }) {
     const [isDropdownOpen, setIsDropdownOpen] = useState(false);
-    const [isDropdownVisible, setDropdownVisible] = useState(false);
-
   
     const handleDropdownToggle = (e) => {
       e.preventDefault();
@@ -130,14 +129,8 @@ export default function Sidebar({ onToggleSidebar }) {
         </div>
   
         {isDropdownOpen && (
-          <div className="bg-white absolute border shadow-lg left-full  ml-5" style={{zIndex: 10000}}>
-            <ul
-              style={{
-                backgroundColor: "white",  
-                width: '200px', 
-              }}
-              
-            >
+          <div className="bg-white absolute border shadow-lg ">
+            <ul>
               {children}
             </ul>
           </div>
@@ -169,7 +162,7 @@ export default function Sidebar({ onToggleSidebar }) {
         style={{
           position: "fixed",
           top: "4px",
-          left: expanded ? "15vw" : "5vw",
+          left: expanded ? "16vw" : "5vw",
         }}
         className="p-1.5 rounded-lg bg-gray-50 hover:bg-gray-100 transition-all duration-300 ease-in-out z-40"
       >
@@ -178,7 +171,7 @@ export default function Sidebar({ onToggleSidebar }) {
 
       {/* Sidebar */}
       <aside
-        className={`fixed h-screen ${
+        className={`fixed z-10 h-screen ${
           expanded ? "w-64" : "w-16"
         } bg-white border-r shadow-lg transition-all duration-300 ease-in-out`}
       >
@@ -204,17 +197,18 @@ export default function Sidebar({ onToggleSidebar }) {
           </div>
 
           <ul className="flex-1 px-3">
-            {/* <SidebarItem
-              text={"Season"}
-              // to="/admin/Season"
-              icon={<i className="fas fa-calendar mr-2 text-lg"></i>}
-              expanded={expanded}
-            /> */}
+
 
 
     {/* Your SidebarItem component */}
     <SidebarItem text={"Season"} icon={<i className="fas fa-calendar mr-2 text-lg"></i>} expanded={expanded}>
-    <ul className="ml-5">
+    <ul className="ml-5 bg-white border border-green-500" style={{ 
+      position: "fixed", 
+      top: "26px",
+      left: expanded ? "15vw" : "5.5vw", 
+      width: '200px'
+      
+    }}>
         {seasons.map(season => (
           <li key={season.id} className="my-2 ml-2">
           <div onClick={() => openModal(season)} className="font-bold ">{season.season_name}</div>
@@ -233,7 +227,7 @@ export default function Sidebar({ onToggleSidebar }) {
     </SidebarItem>
 
     {isModalOpen && (
-      <div>
+      <div className="z-100">
         <Season
           isModalOpen={isModalOpen}
           setIsModalOpen={setIsModalOpen}
@@ -283,18 +277,18 @@ export default function Sidebar({ onToggleSidebar }) {
               icon={<i className="fas fa-house-user mr-2 text-lg"></i>}
               expanded={expanded}
             />
-            <button 
+            {/* <button 
             onClick={Logout}
             >
               <SidebarItem
                 text={"Logout"}
-                // to="/logout"
+                to="/logout"
                 icon={<i className="fas fa-clock mr-2 text-lg"></i>}
                 expanded={expanded}
                 
               />
 
-            </button>
+            </button> */}
             
             {/* <div>
               <button
@@ -308,23 +302,45 @@ export default function Sidebar({ onToggleSidebar }) {
           </ul>
 
           <div className="border-t flex p-3">
-            <img
-              src={`https://ui-avatars.com/api/?name=${name}`}
-              alt=""
-              className="w-10 h-10 rounded-md"
-            />
-            <div
-              className={`flex justify-between items-center overflow-hidden transition-all ${
-                expanded ? "w-52 ml-3" : "w-0"
-              }`}
+            <div 
+                className="flex items-center cursor-pointer"
+                onClick={() => setDropdownVisible(!isDropdownVisible)}
             >
-              <div className="leading-3">
-                <h4 className="font-semibold">{name}</h4>
-                <span className="text-xs text-gray-600" style={{ width: '15px' }}>{email}</span>
-              </div>
-              <MoreVertical size={15} />
+                <img
+                    src={`https://ui-avatars.com/api/?name=${name}`}
+                    alt=""
+                    className="w-10 h-10 rounded-md"
+                />
+                <div
+                    className={`flex justify-between items-center transition-all ${
+                        expanded ? "w-48 ml-3" : "w-0"
+                    }`}
+                >
+                    <div className="leading-3">
+                        <h4 className="font-semibold">{name}</h4>
+                        <span className="text-xs text-gray-600" style={{ width: '12px' }}>{email}</span>
+                    </div>
+                    <div className="relative">
+                        <MoreVertical size={15} />
+                        {isDropdownVisible && (
+                          console.log('open'),
+                          
+                            <div className="absolute bg-white border border-red-600 rounded shadow-lg z-1000"
+                            style={{
+                            bottom: "8px",
+                            position: "fixed",
+                            left: expanded ? "15vw" : "5.5vw",
+                            width: "150px" 
+                            }}>
+                                <button className="block w-full text-left px-4 py-2 hover:bg-red-500 hover:text-white " onClick={Logout}>
+                                    Logout
+                                </button>
+                            </div>
+                        )}
+                    </div>
+                </div>
             </div>
-          </div>
+        </div>
         </nav>
       </aside>
       {/* Mapcard */}

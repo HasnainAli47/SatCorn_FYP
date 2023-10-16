@@ -100,7 +100,7 @@ function Cropfieldform({onSeasonSelect, onFarmSelect}) {
 
   return (
     <>
-    <div style={{ width: "300px" }} className="absolute top-0 z-30 left-0 p-8 bg-white h-screen shadow-lg rounded-md opacity-100 h-screen">
+    <div style={{ width: "300px" }} className="absolute top-0 z-0 left-0 p-8 bg-white h-screen shadow-lg rounded-md opacity-100 h-screen">
       <h2 className="text-2xl font-bold mb-4 mt-4 text-center">Crop Rotation</h2>
       <span className="text-blueGray-500 text-md font-semibold text-center">Please Select Your Farm</span>
       {/* ... (Farm Dropdown Logic using farms state) ... */}

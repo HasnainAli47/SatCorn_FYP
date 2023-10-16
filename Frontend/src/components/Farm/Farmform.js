@@ -264,7 +264,7 @@ export default function FarmCreationForm({ onLocationChange }) {
     <>
       <div
         style={{ width: "300px" }}
-        className="absolute top-0 z-30 left-0 p-8 bg-white h-screen shadow-lg rounded-md opacity-100 h-screen"
+        className="absolute top-0 z-0 left-0 p-8 bg-white h-screen shadow-lg rounded-md opacity-100 h-screen"
       >
         <button onClick={() => setIsModalOpen(true)} className="bg-blueGray-800 text-white hover:bg-emerald-800 text-sm font-bold uppercase py-2 px-4 rounded shadow hover:shadow-lg outline-none focus:outline-none mr-1 mb-1 w-full ease-linear transition-all focus:ring focus:ring-blue-300">Show Farms</button>
 

@@ -422,27 +422,7 @@ const modalContent = (
   return (
     <>
     <div className="flex h-screen w-full mt-4">
-    {/* <div className="fields-container relative w-4/14 rounded h-60">
-            <table className="w-full border">
-                <thead>
-                  <tr>
-                  <th className="border px-4 py-2 text-xl" colSpan="2">{selectedFarm?.farm_name || "Farm Name"}</th>
-                  </tr>
-                  <tr>
-                        <th className="border px-4 py-2">Your Fields</th>
-                  </tr>
-                </thead>
-                <tbody>
-                    {fields[0].map((field) => (
-                        <tr key={field.id}>
-                            <td className="border px-4 py-2">{field.field_name}</td>
-                        </tr>
-                    ))}
-                </tbody>
-
-
-            </table>
-        </div> */}
+   
         <div className="fields-container relative rounded h-auto p-4 bg-white shadow-md" style={{width: "40%"}}>
             <div className="flex justify-center items-center mb-4">
                 <h2 className="text-xl font-bold">{selectedFarm?.farm_name || "Farm Name"}</h2>
@@ -520,64 +500,6 @@ const modalContent = (
           </div>
 
 
-        {/* <div className="season-container relative rounded h-60 z-0 w-4/14">
-            
-            <table className="w-full border">
-                <thead>
-                    <tr>
-                    <th className="border px-4 py-2 text-xl" colSpan="2">{selectedSeason?.season_name || "Season"}</th>
-
-                    </tr>
-                </thead>
-                <tbody>
-                <tr>
-                    <td className="border px-4 py-2">
-                      <span>Start Date: {selectedSeason?.start_date}     </span>
-                      <span>    End Date: {selectedSeason?.end_date}</span>
-                      </td>
-                </tr>
-                
-                {fields[0].map((field, index) => {
-                  const rotation = cropRotations[index];
-                  return (
-                    <tr
-                      key={field.id}
-                      onMouseEnter={() => setHoveredRow(index)}
-                      
-                      onMouseLeave={() => setHoveredRow(null)}
-                    >
-                      <td className="border px-4 py-2">
-                        {hoveredRow === index ? 
-                          rotation && rotation.crop_name ? (
-                            <>
-                              {rotation.crop_name}
-                              <span> ({rotation.planting_date} to {rotation.harvesting_date}) </span>
-                              <br />
-                              <span className="text-xs mt-1">
-                                Crop Variety: {rotation.crop_variety}
-                              </span>
-                              <button className="bg-blueGray-600 text-white px-2 py-0.5 rounded mt-2" onClick={() => {handleEdit(index, rotation.id);setModalMode('edit');}}>Edit Crop</button>
-                            </>
-                          ) : (
-                            <button className="bg-blueGray-600 text-white px-2 py-0.5 rounded" onClick={() => {setIsModalOpen(true);setModalMode('add');setFormData({cropName: "",plantingDate: null,harvestingDate: null,cropVariety: ""});setSelectedField(field.id)}}>+Add Crop</button>
-                          )
-                        : rotation && rotation.crop_name ? (
-                          <>
-                            {rotation.crop_name}
-                            <span> ({rotation.planting_date} to {rotation.harvesting_date}) </span>
-                            <span className="text-xs mt-1">
-                              Crop Variety: {rotation.crop_variety}
-                            </span>
-                          </>
-                        ) : "None"}
-                      </td>
-                    </tr>
-                  );
-                })}
-
-                </tbody>
-            </table>
-        </div> */}
       </div>
       <ReactModal
          isOpen={isModalOpen}
