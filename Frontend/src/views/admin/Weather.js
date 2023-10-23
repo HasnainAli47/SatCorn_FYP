@@ -35,12 +35,33 @@ const weatherDataStyles = {
   boxShadow: '0 4px 8px rgba(0, 0, 0, 0.1)', // Soft shadow for depth
 };
 
+
 export default function WeatherComponent() {
   const [weatherData, setWeatherData] = useState(null);
   const [placeName, setPlaceName] = useState("");
   const [selectedFarm, setSelectedFarm] = useState("");
   const farmOptions = ["Farm 1", "Farm 2", "Farm 3", "Farm 4"]; // Dummy options
 
+
+  const weatherBackgrounds = {
+    sunny: "/assets/img/sunny.jpg",
+    rainy: "/assets/img/rain.jpg",
+    cloudy: "/assets/img/clouds.jpg",
+    // ... add more weather types and their corresponding images here
+  };
+  
+  function getWeatherBackground(weatherData) {
+    if (!weatherData || !weatherData.weather || !weatherData.weather[0]) return weatherBackgrounds.default;
+  
+    const condition = weatherData.weather[0].main.toLowerCase();
+  
+    if (condition.includes("clear")) return weatherBackgrounds.sunny;
+    if (condition.includes("rain")) return weatherBackgrounds.rainy;
+    if (condition.includes("cloud")) return weatherBackgrounds.cloudy;
+  
+    return weatherBackgrounds.default; // Default background for other conditions
+  }
+  
 
   async function fetchPlaceName(lat, lng) {
     const response = await fetch(`https://maps.googleapis.com/maps/api/geocode/json?latlng=${lat},${lng}&key=${GOOGLE_API_KEY}`);
@@ -104,7 +125,8 @@ export default function WeatherComponent() {
   if (!weatherData) return <p>Loading...</p>;
 
   return (
-    <div style={containerStyles} className="bg-lightBlue-200">
+      <div style={{...containerStyles, backgroundImage: `url(${getWeatherBackground(weatherData)})`}} className="bg-lightBlue-200">
+
        <div style={selectContainerStyles} className="">
         <label style={{ flexGrow: 1 }} className="text-lg font-semibold">Please select the farm from here:</label>
         <select 
