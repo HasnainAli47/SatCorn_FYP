@@ -201,7 +201,7 @@ export default function Sidebar({ onToggleSidebar }) {
 
 
     {/* Your SidebarItem component */}
-    <SidebarItem text={"Season"} icon={<i className="fas fa-calendar mr-2 text-lg"></i>} expanded={expanded}>
+    <SidebarItem text={"Season"} icon={<i className="fas fa-calendar mr-3 text-lg"></i>} expanded={expanded}>
     <ul className="ml-5 bg-white border border-green-500" style={{ 
       position: "fixed", 
       top: "26px",
@@ -240,22 +240,23 @@ export default function Sidebar({ onToggleSidebar }) {
 
 
 
-            <SidebarItem
+            {/* <SidebarItem
               text={"Settings"}
               to="/admin/settings"
               icon={<i className="fas fa-tools mr-2 text-lg"></i>}
               expanded={expanded}
-            />
+            /> */}
             <SidebarItem
               text={"Farms"}
               to="/admin/farms"
-              icon={<i className="fas fa-table mr-2 text-lg"></i>}
+              icon={<i className="fas fa-map-marked mr-2 text-lg"></i>}
               expanded={expanded}
             />
             <SidebarItem
-              text={"Draw"}
+              text={"Fields"}
               to="/admin/maps"
-              icon={<i className="fas fa-map-marked mr-2 text-lg"></i>}
+              icon={<i class="fa fa-crop mr-3 text-lg" aria-hidden="true"></i>
+            }
               expanded={expanded}
             />
             <SidebarItem
@@ -267,7 +268,15 @@ export default function Sidebar({ onToggleSidebar }) {
             <SidebarItem
               text={"Crop Rotation"}
               to="/admin/croprotation"
-              icon={<i className="fas fa-clock mr-2 text-lg"></i>}
+              icon={<i class="fas fa-seedling mr-3 text-lg"></i>}
+              expanded={expanded}
+              active
+            />
+            <SidebarItem
+              text={"Jobs"}
+              to="/admin/jobs"
+              icon={<i class="fa fa-tasks mr-3 text-lg" aria-hidden="true"></i>
+            }
               expanded={expanded}
               active
             />

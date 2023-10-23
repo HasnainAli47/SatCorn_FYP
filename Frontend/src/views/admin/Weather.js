@@ -110,7 +110,7 @@ export default function WeatherComponent() {
         <select 
           value={selectedFarm} 
           onChange={(e) => setSelectedFarm(e.target.value)}
-          className="bg-white border rounded px-3 py-2 text-black shadow-md appearance-none focus:outline-none focus:ring-2 focus:ring-blue-500"
+          className="bg-white border border-blueGray-50 rounded px-8 py-2 text-black shadow-md appearance-none focus:outline-none focus:ring-2 focus:ring-blue-500"
 
         >
           <option value="" disabled>Select a farm</option>

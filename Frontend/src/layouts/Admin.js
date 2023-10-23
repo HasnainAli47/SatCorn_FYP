@@ -21,6 +21,7 @@ import Settings from "views/admin/Settings.js";
 import Farms from "views/admin/Farms.js";
 import Weather from "views/admin/Weather.js";
 import Croprotation from "views/admin/Croprotation.js";
+import Jobs from "views/admin/Jobs";
 // import Navbar from "components/Navbars/AdminNavbar";
 
 export default function Admin() {
@@ -68,6 +69,7 @@ export default function Admin() {
           <Route path="/admin/settings" exact component={Settings} />
           <Route path="/admin/farms" exact component={Farms} />
           <Route path="/admin/weather" exact component={Weather} />
+          <Route path="/admin/jobs" exact component={Jobs} />
           <Redirect from="/admin" to="/admin/dashboard" />
         </Switch>
         {/* <FooterAdmin /> */}
