@@ -1,11 +1,12 @@
 import React, { useEffect, useState } from "react";
+//import Axios from "axios";
 
-
-function Left({onSeasonSelect, onFarmSelect}){
+function Left({setSelectedFieldId}){
     const [isFarmDropdownOpen, setIsFarmDropdownOpen] = useState(false);
   const [isSeasonDropdownOpen, setIsSeasonDropdownOpen] = useState(false);
-  const [selectedSeasonoption, setSelectedSeasonoption] = useState("");
+  const [selectedFieldOption, setSelectedFieldOption] = useState("");
   const [selectedOption, setSelectedOption] = useState("");
+  const [fieldsDetails, setFieldsDetails] = useState([]);
 
     //farms
   const [options, setoptions] = useState([
@@ -34,14 +35,14 @@ function Left({onSeasonSelect, onFarmSelect}){
 
 useEffect(() => {
     async function fetchFarms() {
-      // try {
-      //   const farmsResponse = await Axios.get("http://127.0.0.1:8000/api/get-farms", {
-      //     withCredentials: true
-      //   });
-      //   setFarms(farmsResponse.data);
-      // } catch (error) {
-      //   console.error("Error fetching farms:", error);
-      // }
+    //   try {
+    //     const farmsResponse = await Axios.get("http://127.0.0.1:8000/api/get-farms", {
+    //       withCredentials: true
+    //     });
+    //     setoptions(farmsResponse.data);
+    //   } catch (error) {
+    //     console.error("Error fetching farms:", error);
+    //   }
     }
   
     fetchFarms();
@@ -49,51 +50,39 @@ useEffect(() => {
 
   
 
-  useEffect(() => {
-    if (!selectedOption) return; // Don't fetch if no farm is selected
-  
-    async function fetchSeasons() {
-      // try {
-      //   const seasonsResponse = await Axios.get(`http://127.0.0.1:8000/api/get-seasons`, {
-      //     withCredentials: true
-      //   });
-      //   setSeasons(seasonsResponse.data);
-      // } catch (error) {
-      //   console.error("Error fetching seasons:", error);
-      // }
+useEffect(() => {
+    if (!selectedOption) return;
+
+    async function fetchFields() {
+        // try {
+        //     const farmId = options.find(o => o.farm_name === selectedOption).id;
+        //     const fieldsResponse = await Axios.get(`http://127.0.0.1:8000/api/get-fields/${farmId}`, {
+        //         withCredentials: true
+        //     });
+        //     setFieldsDetails(fieldsResponse.data);
+        // } catch (error) {
+        //     console.error("Error fetching fields:", error);
+        // }
     }
-  
-    fetchSeasons();
-  }, [selectedOption]); // This effect runs every time selectedOption (selected farm) changes
+
+    fetchFields();
+}, [selectedOption, options]);
   
 
-// Handle option selection of farm
+// This will be called when a farm is selected
 const handleOptionSelect = (option) => {
-    setSelectedOption(option.farm_name)
-    // changing for dummy data
-    //onFarmSelect(option);
-    onFarmSelect({
-    //   id: option.id,
-    //   farm_name: option.farm_name,
-    //   latitude: option.latitude,
-    //   longitude: option.longitude,
-    })
+    setSelectedOption(option.farm_name);
+    
     setIsFarmDropdownOpen(false);
-  };
+};
 
-  // Handle option Selection for Season
-  const handleSeasonChange = (seasonoption) => {
-    setSelectedSeasonoption(seasonoption.season_name)
-     // changing for dummy data
-    // onSeasonSelect(seasonoption);
-    onSeasonSelect({
-      id: seasonoption.id,
-      season_name: seasonoption.season_name,
-      start_date: seasonoption.start_date,
-      end_date: seasonoption.end_date  
-    })
+  // Handle field Selection 
+const handleFieldChange = (fieldOption) => {
+    // logic for when a field is selected
+    setSelectedFieldId(fieldOption.id);
+    setSelectedFieldOption(fieldOption.field_name);
     setIsSeasonDropdownOpen(false);
-  };
+};
 
     return(
         <>
@@ -122,18 +111,17 @@ const handleOptionSelect = (option) => {
             {/* ... (Season Dropdown Logic using seasons state) ... */}
             <div className="relative inline-block text-center w-full">
                 <button onClick={() => { setIsSeasonDropdownOpen(!isSeasonDropdownOpen); setIsFarmDropdownOpen(false); }} disabled={!selectedOption} className="mt-2 text-white bg-blueGray-700 hover:bg-emerald-200 hover:text-emerald-800 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm px-4 py-2 w-full text-center inline-flex items-center dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800 flex" type="button" id="dropdownButton">
-                <span className="flex-grow">{selectedSeasonoption || "Select Season"}</span>
+                <span className="flex-grow">{selectedFieldOption || "Select Field"}</span>
                 {/* SVG remains the same */}
                 </button>
                 {isSeasonDropdownOpen && (
-                <div className="origin-top-right absolute right-0 mt-2 w-full rounded-md shadow-lg bg-white ring-1 ring-black ring-opacity-5 divide-y divide-gray-100 focus:outline-none" role="menu" aria-orientation="vertical" aria-labelledby="dropdownButton" tabIndex="-1">
-                    <div className="py-1" role="none">
-                    {/* changing 'seasons' with 'seasonDetails' for dummy data. */}
-                    {seasonDetails.map((seasonoption) => (
-                        <button key={seasonoption.id} onClick={() => handleSeasonChange(seasonoption)} className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 hover:text-gray-900" role="menuitem">{seasonoption.season_name}</button>
-                    ))}
+                    <div className="origin-top-right absolute right-0 mt-2 w-full rounded-md shadow-lg bg-white ring-1 ring-black ring-opacity-5 divide-y divide-gray-100 focus:outline-none" role="menu" aria-orientation="vertical" aria-labelledby="dropdownButton" tabIndex="-1">
+                        <div className="py-1" role="none">
+                            {fieldsDetails.map((fieldOption) => (
+                                <button key={fieldOption.id} onClick={() => handleFieldChange(fieldOption)} className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 hover:text-gray-900" role="menuitem">{fieldOption.field_name}</button>
+                            ))}
+                        </div>
                     </div>
-                </div>
                 )}
 
             </div>
