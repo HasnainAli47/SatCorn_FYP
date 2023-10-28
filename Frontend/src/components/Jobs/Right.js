@@ -43,7 +43,7 @@ function Right({ selectedFieldId }) {  // Accept the selectedFieldId as a prop
 
     return (
         <>
-            <div className="relative flex w-full">
+            {/* <div className="relative flex w-full">
                 {tasks.map(task => (
                     <div key={task.id} className="border p-4 m-2 rounded-md">
                         <h3 className="font-bold text-xl">{task.name}</h3>
@@ -51,7 +51,36 @@ function Right({ selectedFieldId }) {  // Accept the selectedFieldId as a prop
                         <p>Status: {task.status}</p>
                     </div>
                 ))}
+            </div> */}
+            <div className="w-full h-full p-4">
+                <div className="flex justify-between mb-4">
+                    <div className="font-bold p-4 w-1/4">Name</div>
+                    <div className="font-bold p-4 w-1/4 flex justify-between">
+                    Due Date
+                    </div>
+                    <div className="font-bold p-4 w-1/4 flex justify-between">
+                    Status
+                    </div>
+                    <div className="font-bold p-4 w-1/4 flex justify-between">Check</div>
+
+                </div>
+                {tasks.map(task => (
+                    <div key={task.id} className="flex justify-between border m-2 rounded-md p-4">
+                    <div className="w-1/3 p-4 bg-blue-200">{task.name}</div>
+                    <div className="w-1/3 p-4">{task.due_date}</div>
+                    <div className="w-1/3 p-4 bg-green-200">{task.status}</div>
+                    <div className="w-1/3 p-4 bg-green-200">
+                        <button className="text-black px-2 py-0.5 rounded">
+                            Completed
+                        </button>
+                    </div>
+                    </div>
+                    
+                ))}
+                
             </div>
+
+
         </>
     );
 }
