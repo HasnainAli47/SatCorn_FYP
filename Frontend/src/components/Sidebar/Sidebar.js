@@ -322,7 +322,7 @@ export default function Sidebar({ onToggleSidebar }) {
                 />
                 <div
                     className={`flex justify-between items-center transition-all ${
-                        expanded ? "w-48 ml-3" : "w-0"
+                        expanded ? "w-48 ml-3" : "w-5 overflow-hidden"
                     }`}
                 >
                     <div className="leading-3">
