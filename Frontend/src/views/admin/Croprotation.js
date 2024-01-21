@@ -1,6 +1,5 @@
 import React, { useEffect, useState } from "react";
 import Axios from 'axios';
-//import ReactModal from "react-modal";
 import Cropfieldform from "components/Crop Rotation/Cropfieldform";
 import Side from "components/Crop Rotation/side";
 
@@ -10,9 +9,6 @@ function Cropsrotation() {
   const [selectedFarm, setSelectedFarm] = useState(null);
   const [fields, setFields] = useState([]);
   const [seasonDetails, setSeasonDetails] = useState([]);
-  
-  
-  //console.log("Feidls are ", fields.length);
 
   useEffect(() => {
     async function fetchFields() {
@@ -68,7 +64,6 @@ function Cropsrotation() {
         SeasonDetails={seasonDetails}
         />
         
-        {/* ... [Rest of your code for ReactModal] */}
     </div>
 );
 }

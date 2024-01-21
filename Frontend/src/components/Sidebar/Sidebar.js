@@ -7,32 +7,31 @@ import Axios from "axios";
 import axios from "axios";
 import Season from "views/admin/Season";
 import { bottom } from "@popperjs/core";
-// import image1 from "../../assets/img/logos/1.png";
-// import image2 from "../../assets/img/logos/2.png";
 
 export default function Sidebar({ onToggleSidebar }) {
   const [expanded, setExpanded] = useState(false);
-  const [name, setname] = useState('');
+  const [isDropdownVisible, setDropdownVisible] = useState(false);
+  const [name, setname] = useState('Hasnain Ali');
   const [email, setEmail] = useState('');
   const history = useHistory();
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [modalSeasonData, setModalSeasonData] = useState(null);
   const [seasons, setSeasons] = useState(
     [
-      {
-          "id": 2,
-          "user": 18,
-          "season_name": "Summer Season",
-          "start_date": "2023-05-01",
-          "end_date": "2023-08-31"
-      },
-      {
-          "id": 1,
-          "user": 18,
-          "season_name": "Summer Season 2",
-          "start_date": "2023-07-01",
-          "end_date": "2023-08-31"
-      }
+      // {
+      //     "id": 2,
+      //     "user": 18,
+      //     "season_name": "Summer Season",
+      //     "start_date": "2023-05-01",
+      //     "end_date": "2023-08-31"
+      // },
+      // {
+      //     "id": 1,
+      //     "user": 18,
+      //     "season_name": "Summer Season 2",
+      //     "start_date": "2023-07-01",
+      //     "end_date": "2023-08-31"
+      // }
   ]);
 
   const openModal = (seasonData = null) => {
@@ -128,14 +127,8 @@ export default function Sidebar({ onToggleSidebar }) {
         </div>
   
         {isDropdownOpen && (
-          <div className="bg-white absolute border shadow-lg left-full  ml-5" style={{zIndex: 10000}}>
-            <ul
-              style={{
-                backgroundColor: "white",  
-                width: '200px', 
-              }}
-              
-            >
+          <div className="bg-white absolute border shadow-lg ">
+            <ul>
               {children}
             </ul>
           </div>
@@ -167,7 +160,7 @@ export default function Sidebar({ onToggleSidebar }) {
         style={{
           position: "fixed",
           top: "4px",
-          left: expanded ? "15vw" : "5vw",
+          left: expanded ? "16vw" : "5vw",
         }}
         className="p-1.5 rounded-lg bg-gray-50 hover:bg-gray-100 transition-all duration-300 ease-in-out z-40"
       >
@@ -176,43 +169,27 @@ export default function Sidebar({ onToggleSidebar }) {
 
       {/* Sidebar */}
       <aside
-        className={`fixed h-screen ${
+        className={`fixed z-10 h-screen ${
           expanded ? "w-64" : "w-16"
         } bg-white border-r shadow-lg transition-all duration-300 ease-in-out`}
       >
         <nav className="h-full flex flex-col">
           <div className="p-4 pb-2 flex justify-between items-center">
-            {/* Conditionally render the logo */}
-            {/* <img
-              src={expanded ? openLogo : closedLogo}
-              className={`h-10 w-10 overflow-hidden transition-all
-             ${expanded ? "w-50 h-50" : "w-0"}`}
-              alt=""
-            /> */}
-            {/* <button
-              onClick={handleToggleSidebar}
-              className="p-1.5 rounded-lg bg-gray-50 hover:bg-gray-100"
-            >
-              {expanded ? (
-                <ChevronFirst size={24} />
-              ) : (
-                <ChevronLast size={24} />
-              )}
-            </button> */}
           </div>
 
           <ul className="flex-1 px-3">
-            {/* <SidebarItem
-              text={"Season"}
-              // to="/admin/Season"
-              icon={<i className="fas fa-calendar mr-2 text-lg"></i>}
-              expanded={expanded}
-            /> */}
+
 
 
     {/* Your SidebarItem component */}
-    <SidebarItem text={"Season"} icon={<i className="fas fa-calendar mr-2 text-lg"></i>} expanded={expanded}>
-    <ul className="ml-5">
+    <SidebarItem text={"Season"} icon={<i className="fas fa-calendar mr-3 text-lg"></i>} expanded={expanded}>
+    <ul className="ml-5 bg-white border border-green-500" style={{ 
+      position: "fixed", 
+      top: "26px",
+      left: expanded ? "15vw" : "5.5vw", 
+      width: '200px'
+      
+    }}>
         {seasons.map(season => (
           <li key={season.id} className="my-2 ml-2">
           <div onClick={() => openModal(season)} className="font-bold ">{season.season_name}</div>
@@ -223,7 +200,7 @@ export default function Sidebar({ onToggleSidebar }) {
         
         ))}
         <li className="my-2 ml-2">
-        <button onClick={() => openModal()} className="bg-blueGray-600 text-white px-4 py-2 ml-2 mb-2">+ Add new season</button>
+        <button onClick={() => openModal()} className="bg-blueGray-600 hover:bg-green-500 text-white px-4 py-2 ml-2 mb-2">+ Add new season</button>
 
 
         </li>
@@ -231,7 +208,7 @@ export default function Sidebar({ onToggleSidebar }) {
     </SidebarItem>
 
     {isModalOpen && (
-      <div>
+      <div className="z-100">
         <Season
           isModalOpen={isModalOpen}
           setIsModalOpen={setIsModalOpen}
@@ -244,22 +221,23 @@ export default function Sidebar({ onToggleSidebar }) {
 
 
 
-            <SidebarItem
+            {/* <SidebarItem
               text={"Settings"}
               to="/admin/settings"
               icon={<i className="fas fa-tools mr-2 text-lg"></i>}
               expanded={expanded}
-            />
+            /> */}
             <SidebarItem
               text={"Farms"}
               to="/admin/farms"
-              icon={<i className="fas fa-table mr-2 text-lg"></i>}
+              icon={<i className="fas fa-map-marked mr-2 text-lg"></i>}
               expanded={expanded}
             />
             <SidebarItem
-              text={"Draw"}
+              text={"Fields"}
               to="/admin/maps"
-              icon={<i className="fas fa-map-marked mr-2 text-lg"></i>}
+              icon={<i class="fa fa-crop mr-3 text-lg" aria-hidden="true"></i>
+            }
               expanded={expanded}
             />
             <SidebarItem
@@ -271,7 +249,15 @@ export default function Sidebar({ onToggleSidebar }) {
             <SidebarItem
               text={"Crop Rotation"}
               to="/admin/croprotation"
-              icon={<i className="fas fa-clock mr-2 text-lg"></i>}
+              icon={<i class="fas fa-seedling mr-3 text-lg"></i>}
+              expanded={expanded}
+              active
+            />
+            <SidebarItem
+              text={"Jobs"}
+              to="/admin/jobs"
+              icon={<i class="fa fa-tasks mr-3 text-lg" aria-hidden="true"></i>
+            }
               expanded={expanded}
               active
             />
@@ -281,52 +267,50 @@ export default function Sidebar({ onToggleSidebar }) {
               icon={<i className="fas fa-house-user mr-2 text-lg"></i>}
               expanded={expanded}
             />
-            <button 
-            onClick={Logout}
-            >
-              <SidebarItem
-                text={"Logout"}
-                // to="/logout"
-                icon={<i className="fas fa-clock mr-2 text-lg"></i>}
-                expanded={expanded}
-                
-              />
-
-            </button>
-            
-            {/* <div>
-              <button
-                className="sidebar-button"
-                onClick={Logout}
-              >
-                <i className="fas fa-clock mr-2 text-lg"></i>
-                Logout
-              </button>
-            </div> */}
           </ul>
 
           <div className="border-t flex p-3">
-            <img
-              src={`https://ui-avatars.com/api/?name=${name}`}
-              alt=""
-              className="w-10 h-10 rounded-md"
-            />
-            <div
-              className={`flex justify-between items-center overflow-hidden transition-all ${
-                expanded ? "w-52 ml-3" : "w-0"
-              }`}
+            <div 
+                className="flex items-center cursor-pointer"
+                onClick={() => setDropdownVisible(!isDropdownVisible)}
             >
-              <div className="leading-3">
-                <h4 className="font-semibold">{name}</h4>
-                <span className="text-xs text-gray-600" style={{ width: '15px' }}>{email}</span>
-              </div>
-              <MoreVertical size={15} />
+                <img
+                    src={`https://ui-avatars.com/api/?name=${name}`}
+                    alt=""
+                    className="w-10 h-10 rounded-md"
+                />
+                <div
+                    className={`flex justify-between items-center transition-all ${
+                        expanded ? "w-48 ml-3" : "w-5 overflow-hidden"
+                    }`}
+                >
+                    <div className="leading-3">
+                        <h4 className="font-semibold">{name}</h4>
+                        {/* <span className="text-xs text-gray-600" style={{ width: '12px' }}>{email}</span> */}
+                    </div>
+                    <div className="relative">
+                        <MoreVertical size={15} />
+                        {isDropdownVisible && (
+                          console.log('open'),
+                          
+                            <div className="absolute bg-white border border-red-600 rounded shadow-lg z-1000"
+                            style={{
+                            bottom: "8px",
+                            position: "fixed",
+                            left: expanded ? "15vw" : "5.5vw",
+                            width: "150px" 
+                            }}>
+                                <button className="block w-full text-left px-4 py-2 hover:bg-red-500 hover:text-white " onClick={Logout}>
+                                    Logout
+                                </button>
+                            </div>
+                        )}
+                    </div>
+                </div>
             </div>
-          </div>
+        </div>
         </nav>
       </aside>
-      {/* Mapcard */}
-      {/* <Mapcard expanded={expanded} onToggleSidebar={handleToggleSidebar} /> */}
     </div>
   );
 }

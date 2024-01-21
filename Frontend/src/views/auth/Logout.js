@@ -12,7 +12,7 @@ function Logout() {
         headers: {
             'Content-Type': 'application/json',
           },
-          withCredentials: true, // Include cookies with the request
+          withCredentials: true, 
       });
 
       // Redirect to the login page or any other authorized route
@@ -27,7 +27,6 @@ function Logout() {
   }, [history]);
 
   return (
-    // You can render a loading indicator or message here
     <div>Logging out...</div>
   );
 }

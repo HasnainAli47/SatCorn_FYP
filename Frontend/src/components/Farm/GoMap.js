@@ -8,7 +8,7 @@ function GopMap() {
   const [polygonMap, setPolygonMap] = useState(null);
   const [polygonCoordinates, setPolygonCoordinates] = useState([]);
 
-  const apiKey = "AIzaSyDMQ9T53DzGbXOtXgrVdBXydpBZN5bgGDs";
+  const apiKey = "AIzaSyDpo-ZoNkacwalqscODE_KNkvKE_2KkYK0";
 
   useEffect(() => {
     const script = document.createElement("script");
@@ -43,8 +43,8 @@ function GopMap() {
         },
         polygonOptions: {
           // Set polygon options here
-          strokeColor: "#FFFF00", // Yellow stroke color
-          fillColor: "#FFFF00", // Yellow fill color
+          strokeColor: "#FFFF00", 
+          fillColor: "#FFFF00", 
         },
       });
       drawingManager.setMap(polygonMap);

@@ -6,10 +6,13 @@ function MapExample() {
   const [polygonCoordinates, setPolygonCoordinates] = useState([]);
   const [showForm, setShowForm] = useState(false);
   const [isDrawing, setIsDrawing] = useState(false);
-  const [apiKey, setApiKey] = useState("AIzaSyDMQ9T53DzGbXOtXgrVdBXydpBZN5bgGDs"); // Set your Google API Key here
+  const [apiKey, setApiKey] = useState("AIzaSyDpo-ZoNkacwalqscODE_KNkvKE_2KkYK0"); // Set your Google API Key here
   const selectedPolygon = useRef(null);
   const [lat, setlat] = useState(28.486753029366852)
   const [lng, setlng] = useState(70.0956817623839)
+  const [infoResult, setInfoResult] = useState(null);
+  const [infoPosition, setInfoPosition] = useState(null);
+
 
   const onPolygonComplete = (polygon) => {
     const coords = polygon
@@ -85,8 +88,19 @@ function MapExample() {
     setlng(longitude);
   };
 
+  useEffect(() => {
+        if (polygonMap && infoPosition && infoResult) {
+          const infoWindow = new window.google.maps.InfoWindow({
+            content: infoResult,
+            position: infoPosition
+          });
+          infoWindow.open(polygonMap);
+        }
+    }, [polygonMap, infoPosition, infoResult]);
+
+
   const initializeMapWithFields = (fields) => {
-    console.log("Fields are ", fields);
+    // console.log("Fields are ", fields);
     if (!polygonMap || !fields || fields.length === 0) return;
 
     fields.forEach(index => {
@@ -103,6 +117,26 @@ function MapExample() {
       drawnPolygon.setMap(polygonMap);
     });
   };
+
+
+  // function ndviToColor(value) {
+  //     // Value between 0 and 1
+  //     const hue = ((1 - value) * 120).toString(10); 
+  //     return ["hsl(", hue, ",100%,50%)"].join("");
+  // }
+
+  // function updatePolygonColor(polygon, ndviValues) {
+  //   console.log("UpdatePolygon is called with ", polygon, " and ", ndviValues);
+  //     const averageNdvi = Object.values(ndviValues).reduce((a, b) => a + b, 0);
+  //     const color = ndviToColor(averageNdvi);
+
+  //   selectedPolygon.setOptions({
+  //         fillColor: color,
+  //         fillOpacity: 0.5
+  //     });
+  // }
+
+
 
   const deleteSelectedPolygon = () => {
     if (selectedPolygon.current) {
@@ -124,6 +158,11 @@ function MapExample() {
         onFarmSelection={handleFarmSelection}
         initializeMapWithFields={initializeMapWithFields}
         mapRef={polygonMap}
+        setInfoResult={setInfoResult}
+        setInfoPosition={setInfoPosition}
+        // updatePolygonColor={updatePolygonColor}
+        // ndviToColor={ndviToColor}
+        // selectedPolygonRef={selectedPolygon}
       />
       <div className="relative w-full rounded h-screen">
         <div id="map" className="rounded h-screen" />

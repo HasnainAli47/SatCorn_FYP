@@ -23,18 +23,13 @@ import Logout from "views/auth/Logout";
 ReactDOM.render(
   <BrowserRouter>
     <Switch>
-      {/* add routes with layouts */}
       <Route path="/admin" component={Admin} />
       <Route path="/login" component={Login} />
       <Route path="/register" component={Register} />
       <Route path="/verifyotp" component={VerifyOtp} />
       <Route path="/logout" component = {Logout} />
-
-      {/* add routes without layouts */}
       <Route path="/" exact component={Landing} />
       <Route path="/profile" exact component={Profile} />
-      {/* <Route path="/" exact component={Index} /> */}
-      {/* add redirect for first page */}
       <Redirect from="*" to="/" />
     </Switch>
   </BrowserRouter>,

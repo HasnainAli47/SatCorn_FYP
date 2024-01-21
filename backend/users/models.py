@@ -45,7 +45,7 @@ class Season(models.Model):
 
 
 class CropRotation(models.Model):
-    season = models.ForeignKey(Season, on_delete=models.CASCADE, related_name='crop_rotations')
+    season = models.ForeignKey(Season, on_delete=models.CASCADE, related_name='crop_rotations', null=True)
     field = models.ForeignKey(Field, on_delete=models.CASCADE, related_name='crop_rotations')
     crop_name = models.CharField(max_length=255, null=True, blank=True, default='Unknown Crop')
     planting_date = models.DateField(null=True, blank=True, default='2000-01-01')
@@ -54,3 +54,19 @@ class CropRotation(models.Model):
 
     def __str__(self):
         return f'{self.crop_name} in {self.field}'
+    
+
+class Job(models.Model):
+    STATUS_CHOICES = [
+        ('Pending', 'Pending'),
+        ('Completed', 'Completed'),
+        ('Incomplete', 'Incomplete'),
+    ]
+    
+    name = models.CharField(max_length=255)
+    due_date = models.DateField()
+    status = models.CharField(max_length=50, choices=STATUS_CHOICES, default='Pending')
+    field = models.ForeignKey(Field, on_delete=models.CASCADE, related_name='jobs')
+
+    def __str__(self):
+        return self.name

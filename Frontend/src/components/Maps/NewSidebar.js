@@ -36,12 +36,17 @@ function NewSidebar({
   polygonCoordinates,
   showForm, setShowForm,
   onDrawField,
-  // drawpolgon,
   onDeletePolygon,
   onFarmSelection,
   isDrawing,
-  initializeMapWithFields
-  // drawFieldsOnMap
+  initializeMapWithFields,
+  setInfoPosition,
+  setInfoResult,
+  // updatePolygonColor,
+  // ndviToColor,
+  // selectedPolygonRef
+  
+
 }) {
   // <-- Add the isDrawing prop here
   const [isDrawingMode, setIsDrawingMode] = useState(false);
@@ -226,34 +231,80 @@ function NewSidebar({
       }
     
   };
+  
+
+  const handleFieldClick = (polygonCoordinatesObj) => {
+    // Convert the coordinates object to an array
+    const polygonCoordinatesArray = Object.values(polygonCoordinatesObj).map(coord => ({ lat: coord.lat, lng: coord.lng }));
+
+    let first_request_result;
+
+    // Send the data to the server
+    Axios.post("http://127.0.0.1:8000/api/Irrigated-model", {
+        coordinates: polygonCoordinatesArray,
+        withCredentials: true
+    })
+    .then(response => {
+      if (response.data && polygonCoordinatesArray && polygonCoordinatesArray[0]) {
+        first_request_result = response.data[0];
+
+
+
+        // Send the data to the server
+        Axios.post("http://127.0.0.1:8000/api/Classification-model", {
+          coordinates: polygonCoordinatesArray,
+          withCredentials: true
+      })
+      .then(response => {
+        console.log('Data sent successfully:', response.data);
+        if (response.data && response.data.result && polygonCoordinatesArray && polygonCoordinatesArray[0]) {
+            // setInfoResult();
+            let result_to_display = "The field conatins " + response.data.result + '<br>' + " Irrigation done " + first_request_result + " days ago.";
+            // console.log("The first request result is ", first_request_result)
+            setInfoResult(result_to_display);
+            setInfoPosition(polygonCoordinatesArray[0]);  // Set to the first point of the polygon or any other desired point
+          }
+      })
+      .catch(error => {
+          console.error('Error sending data:', error);
+      });
+
+
+
+        
+        }
+    })
+    .catch(error => {
+        console.error('Error sending data:', error);
+    });
+};
+
+
 
   
 
-
-  // const handleFieldClick = (polygonCoordinates) => {
-  //   console.log("Selected Farm ID:", polygonCoordinates);
-
-  //   // Call the method to draw the polygon with the provided coordinates
-  //   drawpolgon(polygonCoordinates);  };
-
-    const handleFieldClick = (polygonCoordinatesObj) => {
-      // Convert the coordinates object to an array
-      const polygonCoordinatesArray = Object.values(polygonCoordinatesObj).map(coord => ({lat: coord.latitude, lng: coord.longitude}));
-      
-      console.log("Selected Farm ID:", polygonCoordinatesArray);
   
-      // Call the method to draw the polygon with the provided coordinates
-      // drawpolgon(polygonCoordinatesArray);
-  };
-  
-
-  
-  const handleDelete = () => {
+  const handleDelete = (id) => {
     onDeletePolygon(); // Remove the last drawn polygon
-    // Clear form data and hide the form
-    setFieldName('');
-    setCropType('');
-    setShowForm(false);
+    console.log("The recieved id is ", id);
+    // Set up the URL with the provided ID
+  const url = `http://127.0.0.1:8000/api/delete-field/${id}`;
+
+  // Make a DELETE request to the server
+  Axios.delete(url, {withCredentials: true})
+    .then(response => {
+      // Handle the successful deletion here
+      console.log('Field deleted successfully', response.data);
+      // If you need to perform state updates or any follow-up actions, do them here
+      setFieldName('');
+      setCropType('');
+      setShowForm(false);
+      window.location.reload();
+    })
+    .catch(error => {
+      // Handle any errors here
+      console.error('There was an error deleting the field', error);
+    });
   };
 
 
@@ -343,7 +394,7 @@ function NewSidebar({
         ) : (
         
         <div className="flex-col">
-        <div>
+        <div className="overflow-y-auto">
         <h1 className="text-center font-bold text-2xl mb-2">Fields</h1>
         <span className="text-blueGray-500 text-md font-semibold text-center">Select Farm First</span>
 
@@ -411,7 +462,6 @@ function NewSidebar({
                   <button
                     onClick={() => {
                       handleDelete(field.id);
-                      console.log("The button clicked is ", field.id);
                     }}
                     className="bg-red-500 text-white px-3 py-1 rounded hover:bg-red-600"
                   >

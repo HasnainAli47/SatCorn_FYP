@@ -22,12 +22,11 @@ function Cropfieldform({onSeasonSelect, onFarmSelect}) {
     }
   
     fetchFarms();
-  }, []); // Empty dependency array ensures this effect runs once when component mounts
-
+  }, []); 
   
 
   useEffect(() => {
-    if (!selectedOption) return; // Don't fetch if no farm is selected
+    if (!selectedOption) return; 
   
     async function fetchSeasons() {
       try {
@@ -41,7 +40,7 @@ function Cropfieldform({onSeasonSelect, onFarmSelect}) {
     }
   
     fetchSeasons();
-  }, [selectedOption]); // This effect runs every time selectedOption (selected farm) changes
+  }, [selectedOption]); 
   
 
   // Handle option selection of farm
@@ -60,12 +59,12 @@ function Cropfieldform({onSeasonSelect, onFarmSelect}) {
 
   return (
     <>
-    <div style={{ width: "300px" }} className="absolute top-0 z-30 left-0 p-8 bg-white h-screen shadow-lg rounded-md opacity-100 h-screen">
+    <div style={{ width: "300px" }} className="absolute top-0 z-0 left-0 p-8 bg-white h-screen shadow-lg rounded-md opacity-100 h-screen">
       <h2 className="text-2xl font-bold mb-4 mt-4 text-center">Crop Rotation</h2>
       <span className="text-blueGray-500 text-md font-semibold text-center">Please Select Your Farm</span>
       {/* ... (Farm Dropdown Logic using farms state) ... */}
       <div className="relative inline-block text-center w-full">
-        <button onClick={() => { setIsFarmDropdownOpen(!isFarmDropdownOpen); setIsSeasonDropdownOpen(false); }} className="mt-2 mb-2 text-white bg-blueGray-700 hover:bg-blueGray-600 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm px-4 py-2 w-full text-center inline-flex items-center dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800 flex" type="button" id="dropdownButton">
+        <button onClick={() => { setIsFarmDropdownOpen(!isFarmDropdownOpen); setIsSeasonDropdownOpen(false); }} className="mt-2 mb-2 text-white bg-blueGray-700 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm px-4 py-2 w-full text-center inline-flex items-center dark:bg-blue-600 dark:focus:ring-blue-800 flex hover:bg-lightBlue-200 hover:text-sky-700" type="button" id="dropdownButton">
           <span className="flex-grow">{selectedOption || "Select Farm"}</span>
           {/* SVG remains the same */}
         </button>
@@ -81,9 +80,8 @@ function Cropfieldform({onSeasonSelect, onFarmSelect}) {
       </div>
 
       <span className="mt-2 text-blueGray-500 text-md font-semibold text-center">Please Choose Season</span>
-      {/* ... (Season Dropdown Logic using seasons state) ... */}
       <div className="relative inline-block text-center w-full">
-        <button onClick={() => { setIsSeasonDropdownOpen(!isSeasonDropdownOpen); setIsFarmDropdownOpen(false); }} disabled={!selectedOption} className="mt-2 text-white bg-blueGray-700 hover:bg-blueGray-600 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm px-4 py-2 w-full text-center inline-flex items-center dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800 flex" type="button" id="dropdownButton">
+        <button onClick={() => { setIsSeasonDropdownOpen(!isSeasonDropdownOpen); setIsFarmDropdownOpen(false); }} disabled={!selectedOption} className="mt-2 text-white bg-blueGray-700 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm px-4 py-2 w-full text-center inline-flex items-center dark:bg-blue-600 dark:focus:ring-blue-800 flex hover:bg-emerald-200 hover:text-emerald-800" type="button" id="dropdownButton">
           <span className="flex-grow">{selectedSeasonoption || "Select Season"}</span>
           {/* SVG remains the same */}
         </button>
@@ -103,3 +101,24 @@ function Cropfieldform({onSeasonSelect, onFarmSelect}) {
 }
 
 export default Cropfieldform;
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

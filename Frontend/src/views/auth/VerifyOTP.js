@@ -72,7 +72,6 @@ export default function VerifyOTP() {
     <>
        {loading && (
         <div className="fixed top-0 left-0 w-full h-full flex items-center justify-center z-50">
-          {/* Full-screen loader */}
           <Rings color="#00BFFF" height={80} width={80} />
         </div>
       )}

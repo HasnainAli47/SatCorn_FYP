@@ -13,24 +13,24 @@ import { useHistory } from "react-router-dom";
 export default function Login() {
   const history = useHistory();
 
-  // useEffect(() => {
-  //   // Check if the user is already logged in
-  //   async function checkUserLogin() {
-  //     try {
-  //       const response = await Axios.get('http://127.0.0.1:8000/api/user', {
-  //         withCredentials: true, // Include cookies with the request
-  //       });
+  useEffect(() => {
+    // Check if the user is already logged in
+    async function checkUserLogin() {
+      try {
+        const response = await Axios.get('http://127.0.0.1:8000/api/user', {
+          withCredentials: true, // Include cookies with the request
+        });
     
-  //       if (response.status === 200) {
-  //       history.push("/admin/maps"); // Redirect to the login page or any other authorized route
-  //       }
-  //     } catch (error) {
-  //       console.log("No, you are not logged in", error);
+        if (response.status === 200) {
+        history.push("/admin/maps"); // Redirect to the login page or any other authorized route
+        }
+      } catch (error) {
+        console.log("No, you are not logged in", error);
         
-  //     }
-  //   }
-  //   checkUserLogin();
-  // }, [history]);
+      }
+    }
+    checkUserLogin();
+  }, [history]);
 
   
   const { register, handleSubmit } = useForm(); // Use useForm
@@ -71,7 +71,6 @@ export default function Login() {
         }, 5000);
         // Redirect to the /admin/maps route using history
         history.push('/admin/maps');
-        // Add your logic for successful login (e.g., redirect)
       } else {
         setErrorMessage('Email or password Incorrect');
         setSuccessMessage(null);
@@ -99,7 +98,6 @@ export default function Login() {
           <Rings color="#00BFFF" height={80} width={80} />
         </div>
       )}
-      {/* <Navbar transparent /> */}
       <div
         className="bg-cover bg-center min-h-screen"
         style={{
@@ -244,15 +242,6 @@ export default function Login() {
         </main>
         <FooterSmall transparent />
       </div>
-
-      {/* ... (other form elements) */}
-      {/* <div className="text-center mt-6"> */}
-      {/* <button
-        className="bg-blueGray-800 text-white active:bg-blueGray-600 text-sm font-bold uppercase px-6 py-3 rounded shadow hover:shadow-lg outline-none focus:outline-none mr-1 mb-1 w-full ease-linear transition-all duration-150"
-        type="submit"
-        onClick={resetState}
-      ></button> */}
-      {/* </div> */}
     </>
   );
 }

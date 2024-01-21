@@ -62,7 +62,7 @@ function Side({ selectedSeason, selectedFarm , FormsData }) {
 
 
 
-
+ // changing handlesubmit to access dummy data for now
   const handleSubmit = async (e) => {
       e.preventDefault();
 
@@ -98,6 +98,19 @@ function Side({ selectedSeason, selectedFarm , FormsData }) {
 
       setIsModalOpen(false)
   };
+  // const handleSubmit = async (e) => {
+  //   e.preventDefault();
+
+  //   const formDataToSend = {
+  //     crop_name: name, 
+  //     plant_date: plantingDate, 
+  //     harvest_date: harvestingDate, 
+  //     crop_variety: cropVariety
+  //   };
+
+  //   console.log("Sending to submit form data is ", formDataToSend);
+  //   setIsModalOpen(false)
+  // }
 
 
 
@@ -143,13 +156,56 @@ const handleDelete = async () => {
       }
   } catch (error) {
       console.error("Error deleting data:", error);
-      // Handle the error accordingly, e.g., show an error message to the user.
   }
   setIsModalOpen(false);
 }
+  //dummy fields 
+  // const [fields, setFields] = useState([
+  //   [
+  //     {
+  //         "id": 4,
+  //         "field_name": "Field 2",
+  //         "coordinates": [
+  //             {
+  //                 "latitude": 123.45678,
+  //                 "longitude": 45.6891
+  //             },
+  //             {
+  //                 "latitude": 123.45789,
+  //                 "longitude": 45.679123
+  //             },
+  //             {
+  //                 "latitude": 123.458901,
+  //                 "longitude": 45.1679234
+  //             }
+  //         ],
+  //         "farm": 12,
+  //         "field_crop": "Corn"
+  //     },
+  //     {
+  //         "id": 5,
+  //         "field_name": "Field 4",
+  //         "coordinates": [
+  //             {
+  //                 "lat": 123.45678,
+  //                 "lng": 45.6891
+  //             },
+  //             {
+  //                 "lat": 123.45789,
+  //                 "lng": 45.679123
+  //             },
+  //             {
+  //                 "lat": 123.458901,
+  //                 "lng": 45.1679234
+  //             }
+  //         ],
+  //         "farm": 12,
+  //         "field_crop": "Corn"
+  //     }
+  // ]
+  // ]);
 
-
-
+    // for now 'dummy data is used'
     const [fields, setFields] = useState(FormsData || []);
     useEffect(() => {
         if (FormsData) {
@@ -326,7 +382,7 @@ const modalContent = (
                     <button
                         type="button"
                         onClick={handleCancel}
-                        className="bg-red-500 text-white active:bg-red-300 font-bold uppercase text-sm px-1 py-1 rounded shadow hover:shadow-lg outline-none focus:outline-none mr-1 mb-1 w-6/12 h-10 transition-all ease-in-out duration-200"
+                        className="bg-slate-500 text-white active:bg-red-300 font-bold uppercase text-sm px-1 py-1 rounded shadow hover:shadow-lg outline-none focus:outline-none mr-1 mb-1 w-6/12 h-10 transition-all ease-in-out duration-200"
                       >
                         Cancel
                     </button>
@@ -342,14 +398,14 @@ const modalContent = (
                     {modalMode === 'edit' ? (
                         <button
                             type="submit"
-                            className="bg-blueGray-800 text-white active:bg-blueGray-600 font-bold uppercase text-sm px-1 py-1 rounded shadow hover:shadow-lg outline-none focus:outline-none mr-1 mb-1 w-6/12 h-10 transition-all ease-in-out duration-200"
+                            className="bg-sky-600 text-white active:bg-blueGray-600 font-bold uppercase text-sm px-1 py-1 rounded shadow hover:shadow-lg outline-none focus:outline-none mr-1 mb-1 w-6/12 h-10 transition-all ease-in-out duration-200"
                         >
                             Update
                         </button>
                     ) : (
                         <button
                             type="submit"
-                            className="bg-blueGray-800 text-white active:bg-blueGray-600 font-bold uppercase text-sm px-1 py-1 rounded shadow hover:shadow-lg outline-none focus:outline-none mr-1 mb-1 w-6/12 h-10 transition-all ease-in-out duration-200"
+                            className="bg-sky-600 text-white active:bg-blueGray-600 font-bold uppercase text-sm px-1 py-1 rounded shadow hover:shadow-lg outline-none focus:outline-none mr-1 mb-1 w-6/12 h-10 transition-all ease-in-out duration-200"
                         >
                             Submit
                         </button>
@@ -365,100 +421,86 @@ const modalContent = (
   return (
     <>
     <div className="flex h-screen w-full mt-4">
-    <div className="fields-container relative w-4/14 rounded h-60">
-            <table className="w-full border">
-                <thead>
-                  <tr>
-                  <th className="border px-4 py-2 text-xl" colSpan="2">{selectedFarm?.farm_name || "Farm Name"}</th>
-                  </tr>
-                  <tr>
-                        <th className="border px-4 py-2">Your Fields</th>
-                  </tr>
-                </thead>
-                <tbody>
-                    {fields.map((field) => (
-                        <tr key={field.id}>
-                            <td className="border px-4 py-2">{field.field_name}</td>
-                        </tr>
-                    ))}
-                </tbody>
+        <div className="fields-container relative rounded h-auto p-4 bg-white shadow-md" style={{width: "40%"}}>
+            <div className="flex justify-center items-center mb-4">
+                <h2 className="text-xl font-bold">{selectedFarm?.farm_name || "Farm Name"}</h2>
+            </div>
 
-
-            </table>
-        </div>
-        <div className="season-container relative rounded h-60 z-0 w-4/14">
+            <div className="my-2 flex justify-center items-center ">
+                <span>Your Fields</span>
+            </div>
+                
+                {fields.map((field) => (
+                  <div key={field.id} className="p-2 bg-lightBlue-200 flex justify-center items-center rounded mb-4">
+                      {field.field_name}
+                  </div>
+                ))}
+              
             
-            <table className="w-full border">
-                <thead>
-                    <tr>
-                    <th className="border px-4 py-2 text-xl" colSpan="2">{selectedSeason?.season_name || "Season"}</th>
+        </div>
 
-                    </tr>
-                </thead>
-                <tbody>
-                <tr>
-                    <td className="border px-4 py-2">
-                      <span>Start Date: {selectedSeason?.start_date}     </span>
-                      <span>    End Date: {selectedSeason?.end_date}</span>
-                      </td>
-                </tr>
-                
-                
+        <div className="season-container relative rounded h-auto p-4 bg-white shadow-md" style={{width: "50%"}}>
+              <div className="flex justify-center items-center mb-4">
+              <h2 className="text-xl font-bold">{selectedSeason?.season_name || "Season"}</h2>
+              </div>
 
+              <div className="flex my-2 justify-center items-center ">
+                  <span>Start Date: {selectedSeason?.start_date}</span>
+                  <span className="mx-4">End Date: {selectedSeason?.end_date}</span>
+              </div>
 
-
-
-                {fields.map((field, index) => {
+              {fields.map((field, index) => {
                   const rotation = cropRotations[index];
                   return (
-                    <tr
-                      key={field.id}
-                      onMouseEnter={() => setHoveredRow(index)}
-                      
-                      onMouseLeave={() => setHoveredRow(null)}
-                    >
-                      <td className="border px-4 py-2">
-                        {hoveredRow === index ? 
-                          rotation && rotation.crop_name ? (
-                            <>
-                              {rotation.crop_name}
-                              <span> ({rotation.planting_date} to {rotation.harvesting_date}) </span>
-                              <br />
-                              <span className="text-xs mt-1">
-                                Crop Variety: {rotation.crop_variety}
-                              </span>
-                              <button className="bg-blueGray-600 text-white px-2 py-0.5 rounded mt-2" onClick={() => {handleEdit(index, rotation.id);setModalMode('edit');}}>Edit Crop</button>
-                            </>
+                      <div
+                          key={field.id}
+                          onMouseEnter={() => setHoveredRow(index)}
+                          onMouseLeave={() => setHoveredRow(null)}
+                          className="p-2 bg-emerald-200 rounded mb-4 flex justify-center items-center"
+                      >
+                          {hoveredRow === index ? 
+                              rotation && rotation.crop_name ? (
+                                  <div className="flex flex-col">
+                                      <span>
+                                          {rotation.crop_name}
+                                          <span className="ml-2">({rotation.planting_date} to {rotation.harvesting_date})</span>
+                                          <span className="text-xs mt-1">   Crop Variety: {rotation.crop_variety}</span>
+                                      </span>
+                                      <button 
+                                          className="bg-blueGray-600 text-white px-2 py-0.5 rounded mt-2"
+                                          onClick={() => {handleEdit(index, rotation.id);setModalMode('edit');}}
+                                      >
+                                          Edit Crop
+                                      </button>
+                                  </div>
+                              ) : (
+                                  <button
+                                      className="text-black px-2 py-0.5 rounded"
+                                      onClick={() => {setIsModalOpen(true);setModalMode('add');setFormData({cropName: "",plantingDate: null,harvestingDate: null,cropVariety: ""});setSelectedField(field.id)}}
+                                  >
+                                      +Add Crop
+                                  </button>
+                              )
+                          : rotation && rotation.crop_name ? (
+                              <div className="flex flex-col">
+                                  <span>
+                                      {rotation.crop_name}
+                                      <span className="ml-2">({rotation.planting_date} to {rotation.harvesting_date})</span>
+                                      <span className="text-xs">Crop Variety: {rotation.crop_variety}</span>
+                                  </span>
+                              </div>
                           ) : (
-                            <button className="bg-blueGray-600 text-white px-2 py-0.5 rounded" onClick={() => {setIsModalOpen(true);setModalMode('add');setFormData({cropName: "",plantingDate: null,harvestingDate: null,cropVariety: ""});setSelectedField(field.id)}}>+Add Crop</button>
-                          )
-                        : rotation && rotation.crop_name ? (
-                          <>
-                            {rotation.crop_name}
-                            <span> ({rotation.planting_date} to {rotation.harvesting_date}) </span>
-                            <span className="text-xs mt-1">
-                              Crop Variety: {rotation.crop_variety}
-                            </span>
-                          </>
-                        ) : "None"}
-                      </td>
-                    </tr>
+                              <span>None</span>
+                          )}
+                      </div>
                   );
-                })}
-
-
-
-
-
-
-                </tbody>
-            </table>
-        </div>
+              })}
+          </div>
       </div>
       <ReactModal
          isOpen={isModalOpen}
         onRequestClose={() => setIsModalOpen(false)}
-        style={modalStyles} // Apply the custom styles
+        style={modalStyles}
           >            
       {modalContent}
     </ReactModal>
@@ -466,5 +508,3 @@ const modalContent = (
   );
 }
 export default Side;
-
-

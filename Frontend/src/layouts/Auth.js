@@ -3,7 +3,6 @@ import { Switch, Route, Redirect } from "react-router-dom";
 import Navbar from "components/Navbars/AuthNavbar.js";
 import Login from "views/auth/Login.js";
 import Register from "views/auth/Register.js";
-// import VerifyOtp from "views/auth/VerifyOTP.js";
 import VerifyOtp from "views/auth/VerifyOTP.js";
 import Logout from "views/auth/Logout.js";
 

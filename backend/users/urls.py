@@ -1,6 +1,7 @@
 from django.urls import path
-from .views import RegisterView, loginView, UserView, logoutView, VerifyOTPView, CreateFarmView, CreateSeasonView, UpdateSeasonView, DeleteSeasonView, DeleteFarmView, CreateFieldView, UpdateFieldView, DeleteFieldView, FieldListView, FarmListView, SeasonListView, CreateCropRotationView, UpdateCropRotationView, CropRotationListView, DeleteCropRotationView
+from .views import RegisterView, loginView, UserView, logoutView, VerifyOTPView, CreateFarmView, CreateSeasonView, UpdateSeasonView, DeleteSeasonView, DeleteFarmView, CreateFieldView, UpdateFieldView, DeleteFieldView, FieldListView, FarmListView, SeasonListView, CreateCropRotationView, UpdateCropRotationView, CropRotationListView, DeleteCropRotationView, TestModelView, CreateJobView, JobListView, UpdateJobStatusView, IrrigationModel
 # CreateFieldView, RetrieveFieldsView, DeleteFieldView, CalculateNDVIView
+
 
 
 urlpatterns = [
@@ -40,4 +41,14 @@ urlpatterns = [
     path("get-crop-rotations/<int:season_id>/<int:field_id>", CropRotationListView.as_view(), name="get-crop-rotation"),
     path("delete-crop-rotation/<int:crop_rotation_id>", DeleteCropRotationView.as_view(), name="delete-crop-rotation"),
     # path("calculate-ndvi/<int:field_id>", CalculateNDVIView.as_view(), name="calculate-ndvi"),
+    
+    # Jobs Handling
+    path('CreateJob', CreateJobView.as_view(), name='CreateJob'),
+    path('Jobs', JobListView.as_view(), name='Jobs'),
+    path('Jobs/<int:field_id>', JobListView.as_view(), name='Jobs'),
+    path('UpdateJobStatus/<int:job_id>', UpdateJobStatusView.as_view(), name='UpdateJobStatus'),
+    
+    # Model
+    path('Classification-model', TestModelView.as_view(), name='test-model'),
+    path('Irrigated-model', IrrigationModel.as_view(), name='Irrgated-model')
 ]

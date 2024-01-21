@@ -1,5 +1,6 @@
 from rest_framework import serializers
-from .models import User, Farm, Season, Field, CropRotation
+from .models import User, Farm, Season, Field, CropRotation, Job
+from django.utils import timezone
 
 
 class UserSerializer(serializers.ModelSerializer):
@@ -91,5 +92,32 @@ class CropRotationSerializer(serializers.ModelSerializer):
         
         if existing_rotations.exists():
             raise serializers.ValidationError("A crop rotation with this name, field, and planting date already exists in the specified season.")
+        
+        return data
+
+
+
+class JobSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Job
+        fields = ['id', 'name', 'due_date', 'status', 'field']
+
+    def validate(self, data):
+        field = data.get('field')
+        due_date = data.get('due_date')
+
+        # Ensure that the due_date is not in the past
+        if due_date < timezone.now().date():
+            raise serializers.ValidationError("The due date cannot be in the past.")
+
+        # Check if a job with the same name and due date already exists for the specified field
+        existing_jobs = Job.objects.filter(field=field, due_date=due_date)
+
+        # If updating an existing job, exclude it from the check
+        if self.instance:
+            existing_jobs = existing_jobs.exclude(pk=self.instance.pk)
+
+        if existing_jobs.exists():
+            raise serializers.ValidationError("A job with this name and due date already exists for the specified field.")
         
         return data

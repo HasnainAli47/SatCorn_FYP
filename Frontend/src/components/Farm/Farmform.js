@@ -37,7 +37,7 @@ export default function FarmCreationForm({ onLocationChange }) {
   const [locationEntered, setLocationEntered] = useState(false);
   const [farms, setFarms] = useState([]);
   const [isGoogleMapsLoaded, setGoogleMapsLoaded] = useState(false);
-  const apiKey = "AIzaSyDMQ9T53DzGbXOtXgrVdBXydpBZN5bgGDs";
+  const apiKey = "AIzaSyDpo-ZoNkacwalqscODE_KNkvKE_2KkYK0";
 
   useEffect(() => {
     // Check if Google Maps API is already loaded
@@ -56,8 +56,6 @@ export default function FarmCreationForm({ onLocationChange }) {
     });
   
     document.head.appendChild(script);
-  
-    // Cleanup function to remove the script if the component unmounts
     return () => {
       document.head.removeChild(script);
     };
@@ -92,9 +90,6 @@ export default function FarmCreationForm({ onLocationChange }) {
 
       const autocomplete = new window.google.maps.places.Autocomplete(
         locationInputRef.current,
-        {
-          // Make sure there are no restrictions or biasing in the options here
-        }
       );
 
     autocomplete.addListener("place_changed", () => {
@@ -264,41 +259,9 @@ export default function FarmCreationForm({ onLocationChange }) {
     <>
       <div
         style={{ width: "300px" }}
-        className="absolute top-0 z-30 left-0 p-8 bg-white h-screen shadow-lg rounded-md opacity-100 h-screen"
+        className="absolute top-0 z-0 left-0 p-8 bg-white h-screen shadow-lg rounded-md opacity-100 h-screen"
       >
         <button onClick={() => setIsModalOpen(true)} className="bg-blueGray-800 text-white active:bg-blueGray-600 text-sm font-bold uppercase py-2 px-4 rounded shadow hover:shadow-lg outline-none focus:outline-none mr-1 mb-1 w-full ease-linear transition-all focus:ring focus:ring-blue-300">Show Farms</button>
-
-        {/* Display the list of farms */}
-        {/* {farms.map((farm) => (
-          <div key={farm.id} className="mb-4">
-            <h3
-              className="text-lg font-semibold mb-2 cursor-pointer"
-              onClick={() => {
-                console.log(`Latitude: ${farm.latitude}, Longitude: ${farm.longitude}`);
-              }}
-            >
-              {farm.farm_name}
-            </h3>
-            <input
-              type="hidden"
-              id={`latitude_${farm.id}`}
-              name={`latitude_${farm.id}`}
-              value={farm.latitude}
-            />
-            <input
-              type="hidden"
-              id={`longitude_${farm.id}`}
-              name={`longitude_${farm.id}`}
-              value={farm.longitude}
-            />
-            <button
-              onClick={() => handleDeleteFarm(farm.id)}
-              className="bg-red-500 text-white px-3 py-1 rounded hover:bg-red-600"
-            >
-              Delete
-            </button>
-          </div>
-        ))} */}
         <div>
           <h2 className="text-2xl font-bold mb-4 mt-4 text-center">
             Create Farm

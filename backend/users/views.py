@@ -1,18 +1,22 @@
 from rest_framework.views import APIView  # type: ignore
-from rest_framework import status # type: ignore
+from rest_framework import status
+from sklearn.discriminant_analysis import StandardScaler # type: ignore
 from .serializers import UserSerializer, VerifyOTPSerializer
 # , FieldSerializer
 from rest_framework.response import Response #type: ignore
-from .models import User, Farm, Season, Field, CropRotation
+from .models import User, Farm, Season, Field, CropRotation, Job
 # , Field
 from rest_framework.exceptions import AuthenticationFailed, NotFound # type: ignore
 import jwt, datetime # type: ignore
 from .email import send_opt_via_email
 import ee # type : ignore
 from django.http import HttpResponse # type: ignore
-from .serializers import FarmSerializer, SeasonSerializer, FieldSerializer, CropRotationSerializer
+from .serializers import FarmSerializer, SeasonSerializer, FieldSerializer, CropRotationSerializer, JobSerializer
 from django.shortcuts import get_object_or_404
-
+from tensorflow.keras.models import load_model # type: ignore
+import joblib
+import os
+import numpy as np
 
 
 # Register User 
@@ -760,3 +764,419 @@ class DeleteCropRotationView(APIView):
                 'message': 'An error occurred while deleting the crop rotation',
                 'error': str(e)
             })
+
+class JobListView(APIView):
+
+    def get(self, request, field_id=None):  # Making field_id optional with a default value of None
+        user = get_user_with_jwt(request)
+
+        if not user:
+            raise AuthenticationFailed('User not found')
+
+        try:
+            # If field_id is provided, get the jobs specific to that field
+            if field_id:
+                field_jobs = Job.objects.filter(field__id=field_id, field__farm__user=user)
+
+                # If no jobs found for the specified field
+                if not field_jobs.exists():
+                    raise NotFound(detail="No jobs found for the specified field")
+
+                serializer = JobSerializer(field_jobs, many=True)
+                return Response(serializer.data, status=status.HTTP_200_OK)
+            else:
+                # If no specific field_id is provided, get all jobs for the user
+                all_jobs = Job.objects.filter(field__farm__user=user)
+                serializer = JobSerializer(all_jobs, many=True)
+                return Response(serializer.data, status=status.HTTP_200_OK)
+
+        except Exception as e:
+            return Response({
+                'status': status.HTTP_500_INTERNAL_SERVER_ERROR,
+                'message': 'An error occurred while fetching jobs',
+                'error': str(e)
+            })
+
+# Create Job
+class CreateJobView(APIView):
+
+    def post(self, request):
+        user = get_user_with_jwt(request)
+
+        if not user:
+            raise AuthenticationFailed('User not found')
+
+        try:
+            data = request.data
+            field_id = data.get('field')
+
+            # Check if the field ID belongs to the current user's farm
+            try:
+                field = Field.objects.get(id=field_id, farm__user=user)
+            except Field.DoesNotExist:
+                return Response({'message': 'You don\'t have such a field.'}, status=status.HTTP_400_BAD_REQUEST)
+
+            # Add the field ID to the data for creating the job
+            data['field'] = field.id
+
+            serializer = JobSerializer(data=data)
+
+            if serializer.is_valid():
+                serializer.save()
+                
+                return Response({
+                    'status': status.HTTP_201_CREATED,
+                    'message': 'Job created successfully',
+                    'data': serializer.data
+                })
+            else:
+                return Response({
+                    'status': status.HTTP_400_BAD_REQUEST,
+                    'message': 'Invalid data',
+                    'errors': serializer.errors
+                })
+        except Exception as e:
+            return Response({
+                'status': status.HTTP_500_INTERNAL_SERVER_ERROR,
+                'message': 'An error occurred while creating the job',
+                'error': str(e)
+            })
+
+
+# Changing the status to complete job
+class UpdateJobStatusView(APIView):
+    def post(self, request, job_id):
+        user = get_user_with_jwt(request)
+
+        if not user:
+            raise AuthenticationFailed('User not found')
+
+        try:
+            # Assuming you have a mechanism to ensure the job belongs to the user's farm
+            job = Job.objects.get(id=job_id, field__farm__user=user)
+        except Job.DoesNotExist:
+            raise NotFound('Job not found')
+
+        # Update the job status to 'Completed'
+        job.status = 'Completed'
+        job.save(update_fields=['status'])
+
+        # Serialize the updated job
+        serializer = JobSerializer(job)
+        
+        # Return a success response
+        return Response({
+            'status': status.HTTP_200_OK,
+            'message': 'Job status updated to completed successfully',
+            'data': serializer.data
+        })
+
+class TestModelView(APIView):
+    ee.Initialize()
+        
+    def post(self, request):
+        coords = request.data.get('coordinates', [])
+        # Convert the provided lat-lng to the format expected by Earth Engine
+        coordinates = [(coord['lng'], coord['lat']) for coord in coords]
+        # print("Coordinates are ", coordinates)
+        # Fetch the data from GEE
+        data = self.fetch_bands(coordinates)
+        # print("Data is ", data)
+        
+        
+        # Define the desired sequence of bands
+        bands_sequence = ['B1', 'B11', 'B12', 'B2', 'B3', 'B4', 'B5', 'B6', 'B7', 'B8', 'B9', 'EVI', 'GNDVI', 'NDVI']
+        # Convert the data into the specified format
+        formatted_data = []
+        data_length = len(data[bands_sequence[0]])
+        for i in range(data_length):
+            data_point = [data[band][i] for band in bands_sequence if band in data]
+            formatted_data.append(data_point)
+        # print("Formated Sequence is ", formatted_data)
+        
+        ndvi_values = [point[-1] for point in formatted_data]
+
+        # print("NDVI values are:", ndvi_values)
+        
+        # Convert to numpy array
+        formatted_data_np = np.array(formatted_data)
+        
+        # Standardize the data
+        scaler = StandardScaler()
+        standardized_data = scaler.fit_transform(formatted_data_np)
+        # print("Standardized Data: \n", standardized_data)
+        
+        BASE_DIR = os.path.dirname(os.path.abspath(__file__))
+        model_path = os.path.join(BASE_DIR, 'rf_model.pkl')
+        scaler_path = os.path.join(BASE_DIR, 'scaler.pkl')
+                
+        rf_model = joblib.load(model_path)
+        scaler = joblib.load(scaler_path)
+        
+        # Loop through each row of standardized_data and make predictions
+        predicted_classes = []
+        for data_point in standardized_data:
+            data_array = np.array([data_point])
+            predicted_class = rf_model.predict(data_array)
+            predicted_classes.append(int(predicted_class[0]))
+            
+        # Print the predicted classes
+        # print(predicted_classes)
+        # Count occurrences of 0 and 1
+        count_0 = predicted_classes.count(0)
+        count_1 = predicted_classes.count(1)
+
+        # Determine the response based on counts
+        if count_1 + 20 > count_0:
+            response_data = "Mostly corn"
+        elif count_0 > count_1 + 20:
+            response_data = "Not-corn"
+        else:
+            response_data = "Mostly corn"
+            
+        # Collect the NDVI values for the response
+        ndvi_response_data = {'ndvi_values': ndvi_values}
+
+        # Optionally, you can include the other response data
+        ndvi_response_data.update({"result": response_data})
+
+        # Return the determined response
+        return Response(ndvi_response_data)
+
+    def fetch_bands(self, coordinates):
+        # Convert the coordinates to a Geometry object
+        region = ee.Geometry.Polygon(coordinates)
+
+        # Fetch the desired image (e.g., Sentinel-2)
+        image = (ee.ImageCollection('COPERNICUS/S2')
+                .filterBounds(region)
+                .filterDate('2023-03-25', '2023-04-15')
+                )  
+        image = image.median()
+
+        # Define the bands you want to extract
+        bands = ['B1', 'B2', 'B3', 'B4', 'B5', 'B6', 'B7', 'B8', 'B9', 'B11', 'B12']
+
+        # Extract the bands
+        selected_image = image.select(bands)
+
+        # Calculate the NDVI
+        ndvi = selected_image.normalizedDifference(['B8', 'B4']).rename('NDVI')
+
+        # Calculate the GNDVI
+        gndvi = selected_image.normalizedDifference(['B3', 'B4']).rename('GNDVI')
+
+        # Calculate the EVI
+        evi = selected_image.expression(
+            '2.5 * ((NIR - RED) / (NIR + 6 * RED - 7.5 * BLUE + 1))',
+            {
+                'NIR': selected_image.select('B8'),
+                'RED': selected_image.select('B4'),
+                'BLUE': selected_image.select('B2')
+            }
+        ).rename('EVI')
+
+        # Combine the bands and NDVI
+        combined_image = selected_image.addBands(ndvi).addBands(gndvi).addBands(evi)
+        
+        # Extract the data
+        extracted_data = combined_image.reduceRegion(
+            reducer=ee.Reducer.toList(),
+            geometry=region,
+            scale=10
+        ).getInfo()
+        
+
+        return extracted_data
+    
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+import pandas as pd
+
+
+class IrrigationModel(APIView):
+    ee.Initialize()
+        
+    def post(self, request):
+        coords = request.data.get('coordinates', [])
+        # Convert the provided lat-lng to the format expected by Earth Engine
+        coordinates = [(coord['lng'], coord['lat']) for coord in coords]
+        # print("Coordinates are ", coordinates)
+        # Fetch the data from GEE
+        data = self.fetch_bands_from_s1(coordinates)
+        # print("Data is ", data)
+        
+        # Define the features' sequence as per the provided image
+        features_sequence = ['CPR', 'PD', 'RVI', 'VH', 'VV', 'CPR1', 'PD1', 'RVI1', 'VH1', 'VV1', 'CPR2', 'PD2', 'RVI2', 'VH2', 'VV2']
+        formatted_data = self.format_data(data, features_sequence)
+        
+        formatted_data1 = {'CPR': formatted_data[0][0],
+    'PD': formatted_data[0][1],
+    'RVI': formatted_data[0][2],
+    'VH': formatted_data[0][3],
+    'VV': formatted_data[0][4],
+    'CPR1': formatted_data[1][0],
+    'PD1': formatted_data[1][1],
+    'RVI1': formatted_data[1][2],
+    'VH1': formatted_data[1][3],
+    'VV1': formatted_data[1][4],
+    'CPR2': formatted_data[2][0],
+    'PD2': formatted_data[2][1],
+    'RVI2': formatted_data[2][2],
+    'VH2': formatted_data[2][3],
+    'VV2': formatted_data[2][4]}
+        
+        # Convert the formatted data to a DataFrame with the correct column names
+        formatted_data1 = pd.DataFrame([formatted_data1])
+        # print("formatted_data1 ", formatted_data1)s
+        # print("First instance is ", formatted_data1[0][0])
+        
+        
+        # Assuming the model and scaler are saved in the same directory as this file
+        BASE_DIR = os.path.dirname(os.path.abspath(__file__))
+        model_path = os.path.join(BASE_DIR, 'random_forest_model.pkl')
+        
+        # Load the RandomForestRegressor model
+        rf_model = joblib.load(model_path)
+        
+        # Reshape formatted_data if necessary to match the model's expected input
+        # if isinstance(formatted_data, list):
+        #     formatted_data = np.array([formatted_data])
+            
+        # Predict using the loaded model
+        predictions = rf_model.predict(formatted_data1)
+        
+        # Taking the floor value of predictions 
+        predictions = np.floor(predictions)
+        
+        return Response(predictions)
+        
+
+    def fetch_bands_from_s1(self, coordinates):
+        # Assuming the coordinates form a Polygon
+        region = ee.Geometry.Polygon(coordinates)
+        
+        
+        # Calculate today's date and the date 40 days ago
+        today = datetime.datetime.now()
+        forty_days_ago = today - datetime.timedelta(days=40)
+
+        # Format dates in 'YYYY-MM-DD' format
+        start_date = forty_days_ago.strftime('%Y-%m-%d')
+        end_date = today.strftime('%Y-%m-%d')
+        
+        # Fetch Sentinel-1 images
+        image_collection = (ee.ImageCollection('COPERNICUS/S1_GRD')
+                            .filterBounds(region)
+                            .filterDate(start_date, end_date)  
+                            .filter(ee.Filter.eq('instrumentMode', 'IW'))  # Interferometric Wide swath
+                            .filter(ee.Filter.listContains('transmitterReceiverPolarisation', 'VV'))
+                            .filter(ee.Filter.listContains('transmitterReceiverPolarisation', 'VH'))
+                            .limit(3))        
+        
+        # Function to calculate indices for each image
+        def calculate_indices(image):
+            vh = image.select('VH')
+            vv = image.select('VV')
+
+            # Calculate indices
+            cpr = vh.divide(vv).rename('CPR')
+            pd = vv.subtract(vh).rename('PD')
+            rvi = vv.divide(vh).rename('RVI')
+
+            return image.addBands(cpr).addBands(pd).addBands(rvi)
+
+        # Map the function over the image collection
+        indexed_collection = image_collection.map(calculate_indices)
+
+        # Initialize a dictionary to store the extracted data
+        extracted_data = {
+            'CPR': [],
+            'PD': [],
+            'RVI': [],
+            'VH': [],
+            'VV': []
+        }
+
+        # Iterate over the image collection to extract the indices
+        for i in range(3):  # Loop only 3 times since we're sure there are only 3 images
+            image = ee.Image(indexed_collection.toList(3).get(i))
+
+            # Extract the bands data for the image
+            band_data = image.reduceRegion(
+                reducer=ee.Reducer.mean(),
+                geometry=region,
+                scale=10
+            ).getInfo()
+
+            # Append the mean values of the indices to the extracted_data list
+            for band in extracted_data.keys():
+                extracted_data[band].append(band_data[band])
+
+        # print(extracted_data)
+        return extracted_data
+    
+    
+    def format_data(self, data, sequence):
+        # Format the data into a list of lists where each sublist represents feature values for one data point
+        formatted_data = []
+        for feature in sequence:
+            if feature in data:
+                formatted_data.append(data[feature])
+
+        # Transpose the list of lists to match the feature sequence
+        formatted_data = list(map(list, zip(*formatted_data)))
+        return formatted_data
+
+
+        # Define the bands you want to extract
+        # bands = ['B1', 'B2', 'B3', 'B4', 'B5', 'B6', 'B7', 'B8', 'B9', 'B11', 'B12']
+
+        # # Extract the bands
+        # selected_image = image.select(bands)
+
+        # # Calculate the NDVI
+        # ndvi = selected_image.normalizedDifference(['B8', 'B4']).rename('NDVI')
+
+        # # Calculate the GNDVI
+        # gndvi = selected_image.normalizedDifference(['B3', 'B4']).rename('GNDVI')
+
+        # # Calculate the EVI
+        # evi = selected_image.expression(
+        #     '2.5 * ((NIR - RED) / (NIR + 6 * RED - 7.5 * BLUE + 1))',
+        #     {
+        #         'NIR': selected_image.select('B8'),
+        #         'RED': selected_image.select('B4'),
+        #         'BLUE': selected_image.select('B2')
+        #     }
+        # ).rename('EVI')
+
+        # # Combine the bands and NDVI
+        # combined_image = selected_image.addBands(ndvi).addBands(gndvi).addBands(evi)
+        
+        # Extract the data
+        # extracted_data = combined_image.reduceRegion(
+        #     reducer=ee.Reducer.toList(),
+        #     geometry=region,
+        #     scale=10
+        # ).getInfo()
+        
+
+        # return extracted_data
+    
+
